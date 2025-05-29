@@ -1,6 +1,16 @@
 ﻿<%@ Page Title="Home Page" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Default.aspx.cs" Inherits="Shopping._Default" %>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="MainContent" runat="server">
+    <!-- User Info Panel -->
+    <asp:Panel ID="pnlUserInfo" runat="server" CssClass="user-info-panel mb-3">
+        <div class="container">
+            <div class="alert alert-info">
+                Xin chào, <asp:Label ID="lblUsername" runat="server"></asp:Label>
+                <asp:Button ID="btnLogout" runat="server" Text="Đăng xuất" CssClass="btn btn-link" OnClick="btnLogout_Click" />
+            </div>
+        </div>
+    </asp:Panel>
+
     <!-- Font Awesome CDN -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     

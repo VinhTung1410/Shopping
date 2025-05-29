@@ -2,6 +2,16 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+    <style>
+        .required::after {
+            content: "*";
+            color: red;
+            margin-left: 4px;
+        }
+        .valid-input::after {
+            content: "";
+        }
+    </style>
 
     <div class="card shadow border-0 my-4">
         <div class="card-header bg-secondary bg-gradient ml-0 py-3">
@@ -16,33 +26,91 @@
                 <div class="col-6">
                     <asp:Panel ID="pnlAddEdit" runat="server" CssClass="mb-3" Visible="false">
                         <div class="mb-3">
-                            <label for="txtProductID" class="form-label">Product ID</label>
+                            <label for="txtProductID" class="form-label required">Product ID</label>
                             <asp:TextBox ID="txtProductID" runat="server" CssClass="form-control" />
                             <asp:RequiredFieldValidator ID="rfvProductID" runat="server" 
                                 ControlToValidate="txtProductID" 
-                                ErrorMessage="Product ID is required" 
+                                ErrorMessage="Zone này bắt buộc phải điền" 
+                                Display="Dynamic" 
+                                CssClass="text-danger" />
+                            <asp:HiddenField ID="hdnIsEdit" runat="server" Value="false" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="txtProductName" class="form-label required">Product Name</label>
+                            <asp:TextBox ID="txtProductName" runat="server" CssClass="form-control" />
+                            <asp:RequiredFieldValidator ID="rfvProductName" runat="server" 
+                                ControlToValidate="txtProductName" 
+                                ErrorMessage="Zone này bắt buộc phải điền" 
                                 Display="Dynamic" 
                                 CssClass="text-danger" />
                         </div>
                         <div class="mb-3">
-                            <label for="txtProductName" class="form-label">Product Name</label>
-                            <asp:TextBox ID="txtProductName" runat="server" CssClass="form-control" />
+                            <label for="txtQuantityPerUnit" class="form-label required">Quantity Per Unit</label>
+                            <asp:TextBox ID="txtQuantityPerUnit" runat="server" CssClass="form-control" TextMode="Number" />
+                            <asp:RequiredFieldValidator ID="rfvQuantityPerUnit" runat="server" 
+                                ControlToValidate="txtQuantityPerUnit" 
+                                ErrorMessage="Zone này bắt buộc phải điền" 
+                                Display="Dynamic" 
+                                CssClass="text-danger" />
+                            <asp:CompareValidator ID="cvQuantityPerUnit" runat="server"
+                                ControlToValidate="txtQuantityPerUnit"
+                                Type="Integer"
+                                Operator="GreaterThan"
+                                ValueToCompare="0"
+                                ErrorMessage="Giá trị phải lớn hơn 0"
+                                Display="Dynamic"
+                                CssClass="text-danger" />
                         </div>
                         <div class="mb-3">
-                            <label for="txtQuantityPerUnit" class="form-label">Quantity Per Unit</label>
-                            <asp:TextBox ID="txtQuantityPerUnit" runat="server" CssClass="form-control" />
-                        </div>
-                        <div class="mb-3">
-                            <label for="txtUnitPrice" class="form-label">Unit Price</label>
+                            <label for="txtUnitPrice" class="form-label required">Unit Price</label>
                             <asp:TextBox ID="txtUnitPrice" runat="server" CssClass="form-control" TextMode="Number" Step="0.01" />
+                            <asp:RequiredFieldValidator ID="rfvUnitPrice" runat="server" 
+                                ControlToValidate="txtUnitPrice" 
+                                ErrorMessage="Zone này bắt buộc phải điền" 
+                                Display="Dynamic" 
+                                CssClass="text-danger" />
+                            <asp:CompareValidator ID="cvUnitPrice" runat="server"
+                                ControlToValidate="txtUnitPrice"
+                                Type="Double"
+                                Operator="GreaterThan"
+                                ValueToCompare="0"
+                                ErrorMessage="Giá trị phải lớn hơn 0"
+                                Display="Dynamic"
+                                CssClass="text-danger" />
                         </div>
                         <div class="mb-3">
-                            <label for="txtUnitsInStock" class="form-label">Units In Stock</label>
+                            <label for="txtUnitsInStock" class="form-label required">Units In Stock</label>
                             <asp:TextBox ID="txtUnitsInStock" runat="server" CssClass="form-control" TextMode="Number" />
+                            <asp:RequiredFieldValidator ID="rfvUnitsInStock" runat="server" 
+                                ControlToValidate="txtUnitsInStock" 
+                                ErrorMessage="Zone này bắt buộc phải điền" 
+                                Display="Dynamic" 
+                                CssClass="text-danger" />
+                            <asp:CompareValidator ID="cvUnitsInStock" runat="server"
+                                ControlToValidate="txtUnitsInStock"
+                                Type="Integer"
+                                Operator="GreaterThan"
+                                ValueToCompare="0"
+                                ErrorMessage="Giá trị phải lớn hơn 0"
+                                Display="Dynamic"
+                                CssClass="text-danger" />
                         </div>
                         <div class="mb-3">
-                            <label for="txtUnitsOnOrder" class="form-label">Units On Order</label>
+                            <label for="txtUnitsOnOrder" class="form-label required">Units On Order</label>
                             <asp:TextBox ID="txtUnitsOnOrder" runat="server" CssClass="form-control" TextMode="Number" />
+                            <asp:RequiredFieldValidator ID="rfvUnitsOnOrder" runat="server" 
+                                ControlToValidate="txtUnitsOnOrder" 
+                                ErrorMessage="Zone này bắt buộc phải điền" 
+                                Display="Dynamic" 
+                                CssClass="text-danger" />
+                            <asp:CompareValidator ID="cvUnitsOnOrder" runat="server"
+                                ControlToValidate="txtUnitsOnOrder"
+                                Type="Integer"
+                                Operator="GreaterThan"
+                                ValueToCompare="0"
+                                ErrorMessage="Giá trị phải lớn hơn 0"
+                                Display="Dynamic"
+                                CssClass="text-danger" />
                         </div>
                         <div class="mb-3">
                             <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn btn-primary" OnClick="btnSave_Click" />
@@ -89,6 +157,33 @@
     <asp:Panel ID="pnlMessage" runat="server" Visible="false" CssClass="alert alert-success">
         <asp:Literal ID="litMessage" runat="server"></asp:Literal>
     </asp:Panel>
+
+    <script type="text/javascript">
+        $(document).ready(function () {
+            // Function to check input and update asterisk
+            function updateAsterisk(input) {
+                var label = $("label[for='" + input.id + "']");
+                if ($(input).val()) {
+                    label.addClass("valid-input");
+                } else {
+                    label.removeClass("valid-input");
+                }
+            }
+
+            // Add event listeners to all required inputs
+            $("#<%= txtProductID.ClientID %>").on("input", function() { updateAsterisk(this); });
+            $("#<%= txtProductName.ClientID %>").on("input", function() { updateAsterisk(this); });
+            $("#<%= txtQuantityPerUnit.ClientID %>").on("input", function() { updateAsterisk(this); });
+            $("#<%= txtUnitPrice.ClientID %>").on("input", function() { updateAsterisk(this); });
+            $("#<%= txtUnitsInStock.ClientID %>").on("input", function() { updateAsterisk(this); });
+            $("#<%= txtUnitsOnOrder.ClientID %>").on("input", function() { updateAsterisk(this); });
+
+            // Initial check on page load
+            $("input[type='text'], input[type='number']").each(function() {
+                updateAsterisk(this);
+            });
+        });
+    </script>
 </asp:Content>
 
 

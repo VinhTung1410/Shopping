@@ -9,7 +9,6 @@ namespace Shopping.Controller1
 {
     public class ProductController
     {
-        // Get all products
         public List<Product> GetAllProducts()
         {
             List<Product> products = new List<Product>();
@@ -42,7 +41,6 @@ namespace Shopping.Controller1
             }
         }
 
-        // Add new product
         public bool AddProduct(Product product)
         {
             if (product.ProductID <= 0)
@@ -77,7 +75,6 @@ namespace Shopping.Controller1
             }
         }
 
-        // Update product
         public bool UpdateProduct(Product product)
         {
             if (product.ProductID <= 0)
@@ -116,7 +113,6 @@ namespace Shopping.Controller1
             }
         }
 
-        // Delete product
         public bool DeleteProduct(int productId)
         {
             string query = "DELETE FROM \"TUNG\".\"PRODUCTS\" WHERE PRODUCTID = :ProductID";
@@ -139,7 +135,6 @@ namespace Shopping.Controller1
             }
         }
 
-        // Get product by ID
         public Product GetProductById(int productId)
         {
             string query = "SELECT * FROM \"TUNG\".\"PRODUCTS\" WHERE PRODUCTID = :ProductID";
@@ -177,4 +172,4 @@ namespace Shopping.Controller1
             }
         }
     }
-}
+} 

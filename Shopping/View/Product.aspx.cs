@@ -10,7 +10,6 @@ namespace Shopping.View
     public partial class Product : System.Web.UI.Page
     {
         private ProductController productController;
-        private bool isEdit = false;
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -19,6 +18,7 @@ namespace Shopping.View
             if (!IsPostBack)
             {
                 BindGrid();
+                ViewState["IsEdit"] = false;
             }
         }
 
@@ -33,7 +33,8 @@ namespace Shopping.View
             ClearForm();
             pnlAddEdit.Visible = true;
             txtProductID.Enabled = true;
-            isEdit = false;
+            ViewState["IsEdit"] = false;
+            ViewState["EditProductID"] = null;
         }
 
         protected void btnSave_Click(object sender, EventArgs e)
@@ -42,9 +43,12 @@ namespace Shopping.View
             {
                 if (Page.IsValid)
                 {
+                    bool isEdit = (bool)ViewState["IsEdit"];
+                    int productId = isEdit ? (int)ViewState["EditProductID"] : Convert.ToInt32(txtProductID.Text);
+
                     var product = new Model1.Product
                     {
-                        ProductID = Convert.ToInt32(txtProductID.Text),
+                        ProductID = productId,
                         ProductName = txtProductName.Text,
                         QuantityPerUnit = string.IsNullOrEmpty(txtQuantityPerUnit.Text) ? null : txtQuantityPerUnit.Text,
                         UnitPrice = string.IsNullOrEmpty(txtUnitPrice.Text) ? null : (decimal?)Convert.ToDecimal(txtUnitPrice.Text),
@@ -56,12 +60,12 @@ namespace Shopping.View
                     if (isEdit)
                     {
                         success = productController.UpdateProduct(product);
-                        ShowMessage(success, "Product updated successfully!", "Error updating product.");
+                        ShowMessage(success, "Sản phẩm đã được cập nhật!", "Error updating product.");
                     }
                     else
                     {
                         success = productController.AddProduct(product);
-                        ShowMessage(success, "Product added successfully!", "Error adding product.");
+                        ShowMessage(success, "Sản phẩm đã được thêm vào!", "Error adding product.");
                     }
 
                     if (success)
@@ -81,6 +85,8 @@ namespace Shopping.View
         {
             pnlAddEdit.Visible = false;
             ClearForm();
+            ViewState["IsEdit"] = false;
+            ViewState["EditProductID"] = null;
         }
 
         protected void gvProducts_RowCommand(object sender, GridViewCommandEventArgs e)
@@ -95,7 +101,8 @@ namespace Shopping.View
                         Model1.Product product = productController.GetProductById(productId);
                         if (product != null)
                         {
-                            isEdit = true;
+                            ViewState["IsEdit"] = true;
+                            ViewState["EditProductID"] = productId;
                             pnlAddEdit.Visible = true;
                             txtProductID.Text = product.ProductID.ToString();
                             txtProductID.Enabled = false;
@@ -109,7 +116,7 @@ namespace Shopping.View
 
                     case "DeleteProduct":
                         bool success = productController.DeleteProduct(productId);
-                        ShowMessage(success, "Product deleted successfully!", "Error deleting product.");
+                        ShowMessage(success, "Sản phẩm này đã được xóa!", "Error deleting product.");
                         if (success)
                         {
                             BindGrid();

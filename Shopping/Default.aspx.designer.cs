@@ -13,5 +13,8 @@ namespace Shopping
 
     public partial class _Default
     {
+        protected global::System.Web.UI.WebControls.Panel pnlUserInfo;
+        protected global::System.Web.UI.WebControls.Label lblUsername;
+        protected global::System.Web.UI.WebControls.Button btnLogout;
     }
 }
