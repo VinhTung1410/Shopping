@@ -11,7 +11,7 @@ namespace Shopping.Controller1
     {
         public bool IsUsernameExists(string username)
         {
-            string query = "SELECT COUNT(*) FROM \"TUNG\".\"USERS\" WHERE USERNAME = :Username";
+            string query = "SELECT COUNT(*) FROM USERS WHERE USERNAME = :Username";
             try
             {
                 using (OracleConnection conn = Connect.Instance.GetConnection())
@@ -28,6 +28,11 @@ namespace Shopping.Controller1
             {
                 throw new Exception("Error checking username: " + ex.Message);
             }
+            finally
+            {
+                Connect.Instance.CloseConnection();
+            }
+
         }
 
         public bool IsEmailExists(string email)
@@ -35,7 +40,7 @@ namespace Shopping.Controller1
             if (string.IsNullOrEmpty(email))
                 return false;
 
-            string query = "SELECT COUNT(*) FROM \"TUNG\".\"USERS\" WHERE UPPER(EMAIL) = UPPER(:Email)";
+            string query = "SELECT COUNT(*) FROM USERS WHERE UPPER(EMAIL) = UPPER(:Email)";
             try
             {
                 using (OracleConnection conn = Connect.Instance.GetConnection())
@@ -45,7 +50,7 @@ namespace Shopping.Controller1
                         cmd.Parameters.Add("Email", OracleDbType.Varchar2).Value = email.Trim();
                         object result = cmd.ExecuteScalar();
                         System.Diagnostics.Debug.WriteLine($"Email check for {email}: Result = {result}");
-                        
+
                         if (result != null)
                         {
                             int count = Convert.ToInt32(result);
@@ -61,6 +66,11 @@ namespace Shopping.Controller1
                 // Trong trường hợp lỗi, cho phép tiếp tục đăng ký
                 return false;
             }
+            finally
+            {
+                Connect.Instance.CloseConnection();
+            }
+
         }
 
         public bool RegisterUser(User user, Employee employee)
@@ -70,38 +80,40 @@ namespace Shopping.Controller1
                 OracleTransaction transaction = conn.BeginTransaction();
                 try
                 {
-                    // Get next EmployeeID
-                    string getNextEmpIdQuery = "SELECT NVL(MAX(EMPLOYEEID), 0) + 1 FROM \"TUNG\".\"EMPLOYEES\"";
-                    using (OracleCommand cmd = new OracleCommand(getNextEmpIdQuery, conn))
-                    {
-                        employee.EmployeeID = Convert.ToInt32(cmd.ExecuteScalar());
-                    }
 
-                    // Insert Employee
-                    string insertEmployeeQuery = @"INSERT INTO ""TUNG"".""EMPLOYEES"" 
+
+                    // 1.Insert Employee
+                    string insertEmployeeQuery = @"INSERT INTO EMPLOYEES
                         (EMPLOYEEID, FIRSTNAME, LASTNAME, ADDRESS) 
-                        VALUES (:EmployeeID, :FirstName, :LastName, :Address)";
+                        VALUES (SEQ_NW_EMPLOYEES.nextval, :FirstName, :LastName, :Address)";
 
                     using (OracleCommand cmd = new OracleCommand(insertEmployeeQuery, conn))
                     {
                         cmd.Transaction = transaction;
-                        cmd.Parameters.Add("EmployeeID", OracleDbType.Int32).Value = employee.EmployeeID;
+                        //cmd.Parameters.Add("EmployeeID", OracleDbType.Int32).Value = employee.EmployeeID;
                         cmd.Parameters.Add("FirstName", OracleDbType.Varchar2).Value = employee.FirstName;
                         cmd.Parameters.Add("LastName", OracleDbType.Varchar2).Value = employee.LastName;
                         cmd.Parameters.Add("Address", OracleDbType.Varchar2).Value = employee.Address;
                         cmd.ExecuteNonQuery();
                     }
+                    //2. Get current sequence in #1
 
-                    // Insert User
-                    string insertUserQuery = @"INSERT INTO ""TUNG"".""USERS"" 
-                        (USERNAME, PASSWORD, EMAIL, ROLEID, EMPLOYEEID, CREATEDAT, ISACTIVE) 
-                        VALUES (:Username, :Password, :Email, :RoleID, :EmployeeID, :CreatedAt, :IsActive)";
+                    // Get next EmployeeID
+                    string getNextEmpIdQuery = "select SEQ_NW_EMPLOYEES.currval from dual ";
+                    using (OracleCommand cmd = new OracleCommand(getNextEmpIdQuery, conn))
+                    {
+                        employee.EmployeeID = Convert.ToInt32(cmd.ExecuteScalar());
+                    }
+                    // 3. Insert User
+                    string insertUserQuery = @"INSERT INTO USERS
+                        (UserId, USERNAME, PASSWORDHASH, EMAIL, ROLEID, EMPLOYEEID, CREATEDAT, ISACTIVE) 
+                        VALUES (SEQ_NW_USERS.nextval, :Username, :PASSWORDHASH, :Email, :RoleID, :EmployeeID, :CreatedAt, :IsActive)";
 
                     using (OracleCommand cmd = new OracleCommand(insertUserQuery, conn))
                     {
                         cmd.Transaction = transaction;
                         cmd.Parameters.Add("Username", OracleDbType.Varchar2).Value = user.UserName;
-                        cmd.Parameters.Add("Password", OracleDbType.Varchar2).Value = user.Password;
+                        cmd.Parameters.Add("PASSWORDHASH", OracleDbType.Varchar2).Value = user.Password;
                         cmd.Parameters.Add("Email", OracleDbType.Varchar2).Value = user.Email;
                         cmd.Parameters.Add("RoleID", OracleDbType.Int32).Value = user.RoleID;
                         cmd.Parameters.Add("EmployeeID", OracleDbType.Int32).Value = employee.EmployeeID;
@@ -118,20 +130,29 @@ namespace Shopping.Controller1
                     transaction.Rollback();
                     throw new Exception("Error registering user: " + ex.Message);
                 }
+                finally
+                {
+                    Connect.Instance.CloseConnection();
+                }
             }
         }
 
         public bool ValidateLogin(string username, string password)
         {
-            string query = "SELECT COUNT(*) FROM \"TUNG\".\"USERS\" WHERE USERNAME = :Username AND PASSWORD = :Password";
+            string query = "SELECT COUNT(*) FROM USERS WHERE USERNAME = :Username AND PASSWORDHASH = :PASSWORDHASH";
             try
             {
                 using (OracleConnection conn = Connect.Instance.GetConnection())
                 {
+                    if (conn.State != System.Data.ConnectionState.Open)
+                    {
+                        conn.Open();
+                    }
+                    
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
                         cmd.Parameters.Add("Username", OracleDbType.Varchar2).Value = username;
-                        cmd.Parameters.Add("Password", OracleDbType.Varchar2).Value = password;
+                        cmd.Parameters.Add("PASSWORDHASH", OracleDbType.Varchar2).Value = password;
                         int count = Convert.ToInt32(cmd.ExecuteScalar());
                         return count > 0;
                     }
@@ -143,4 +164,4 @@ namespace Shopping.Controller1
             }
         }
     }
-} 
+}
