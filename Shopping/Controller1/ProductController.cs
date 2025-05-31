@@ -14,30 +14,33 @@ namespace Shopping.Controller1
             List<Product> products = new List<Product>();
             string query = "SELECT * FROM \"TUNG\".\"PRODUCTS\"";
 
-            try
+            using (OracleConnection conn = Connect.Instance.GetConnection())
             {
-                using (OracleDataReader reader = Connect.Instance.ExecuteQuery(query))
+                try
                 {
-                    while (reader.Read())
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    using (OracleDataReader reader = cmd.ExecuteReader())
                     {
-                        Product product = new Product
+                        while (reader.Read())
                         {
-                            ProductID = Convert.ToInt32(reader["PRODUCTID"]),
-                            ProductName = reader["PRODUCTNAME"].ToString(),
-                            QuantityPerUnit = reader["QUANTITYPERUNIT"] != DBNull.Value ? reader["QUANTITYPERUNIT"].ToString() : null,
-                            UnitPrice = reader["UNITPRICE"] != DBNull.Value ? Convert.ToDecimal(reader["UNITPRICE"]) : (decimal?)null,
-                            UnitsInStock = reader["UNITSINSTOCK"] != DBNull.Value ? Convert.ToInt32(reader["UNITSINSTOCK"]) : (int?)null,
-                            UnitsOnOrder = reader["UNITSONORDER"] != DBNull.Value ? Convert.ToInt32(reader["UNITSONORDER"]) : (int?)null
-                        };
-                        products.Add(product);
+                            Product product = new Product
+                            {
+                                ProductID = Convert.ToInt32(reader["PRODUCTID"]),
+                                ProductName = reader["PRODUCTNAME"].ToString(),
+                                QuantityPerUnit = reader["QUANTITYPERUNIT"] != DBNull.Value ? reader["QUANTITYPERUNIT"].ToString() : null,
+                                UnitPrice = reader["UNITPRICE"] != DBNull.Value ? Convert.ToDecimal(reader["UNITPRICE"]) : (decimal?)null,
+                                UnitsInStock = reader["UNITSINSTOCK"] != DBNull.Value ? Convert.ToInt32(reader["UNITSINSTOCK"]) : (int?)null,
+                                UnitsOnOrder = reader["UNITSONORDER"] != DBNull.Value ? Convert.ToInt32(reader["UNITSONORDER"]) : (int?)null
+                            };
+                            products.Add(product);
+                        }
                     }
+                    return products;
                 }
-                Connect.Instance.CloseConnection();
-                return products;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error getting products: " + ex.Message);
+                catch (Exception ex)
+                {
+                    throw new Exception("Error getting products: " + ex.Message);
+                }
             }
         }
 
@@ -52,26 +55,27 @@ namespace Shopping.Controller1
                 (PRODUCTID, PRODUCTNAME, QUANTITYPERUNIT, UNITPRICE, UNITSINSTOCK, UNITSONORDER) 
                 VALUES (:ProductID, :ProductName, :QuantityPerUnit, :UnitPrice, :UnitsInStock, :UnitsOnOrder)";
 
-            try
+            using (OracleConnection conn = Connect.Instance.GetConnection())
             {
-                OracleConnection conn = Connect.Instance.GetConnection();
-                using (OracleCommand cmd = new OracleCommand(query, conn))
+                try
                 {
-                    cmd.Parameters.Add("ProductID", OracleDbType.Int32).Value = product.ProductID;
-                    cmd.Parameters.Add("ProductName", OracleDbType.Varchar2).Value = product.ProductName ?? (object)DBNull.Value;
-                    cmd.Parameters.Add("QuantityPerUnit", OracleDbType.Varchar2).Value = product.QuantityPerUnit ?? (object)DBNull.Value;
-                    cmd.Parameters.Add("UnitPrice", OracleDbType.Decimal).Value = product.UnitPrice.HasValue ? (object)product.UnitPrice.Value : DBNull.Value;
-                    cmd.Parameters.Add("UnitsInStock", OracleDbType.Int32).Value = product.UnitsInStock.HasValue ? (object)product.UnitsInStock.Value : DBNull.Value;
-                    cmd.Parameters.Add("UnitsOnOrder", OracleDbType.Int32).Value = product.UnitsOnOrder.HasValue ? (object)product.UnitsOnOrder.Value : DBNull.Value;
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        cmd.Parameters.Add("ProductID", OracleDbType.Int32).Value = product.ProductID;
+                        cmd.Parameters.Add("ProductName", OracleDbType.Varchar2).Value = product.ProductName ?? (object)DBNull.Value;
+                        cmd.Parameters.Add("QuantityPerUnit", OracleDbType.Varchar2).Value = product.QuantityPerUnit ?? (object)DBNull.Value;
+                        cmd.Parameters.Add("UnitPrice", OracleDbType.Decimal).Value = product.UnitPrice.HasValue ? (object)product.UnitPrice.Value : DBNull.Value;
+                        cmd.Parameters.Add("UnitsInStock", OracleDbType.Int32).Value = product.UnitsInStock.HasValue ? (object)product.UnitsInStock.Value : DBNull.Value;
+                        cmd.Parameters.Add("UnitsOnOrder", OracleDbType.Int32).Value = product.UnitsOnOrder.HasValue ? (object)product.UnitsOnOrder.Value : DBNull.Value;
 
-                    int result = cmd.ExecuteNonQuery();
-                    Connect.Instance.CloseConnection();
-                    return result > 0;
+                        int result = cmd.ExecuteNonQuery();
+                        return result > 0;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error adding product: " + ex.Message);
+                catch (Exception ex)
+                {
+                    throw new Exception("Error adding product: " + ex.Message);
+                }
             }
         }
 
@@ -90,26 +94,27 @@ namespace Shopping.Controller1
                 UNITSONORDER = :UnitsOnOrder
                 WHERE PRODUCTID = :ProductID";
 
-            try
+            using (OracleConnection conn = Connect.Instance.GetConnection())
             {
-                OracleConnection conn = Connect.Instance.GetConnection();
-                using (OracleCommand cmd = new OracleCommand(query, conn))
+                try
                 {
-                    cmd.Parameters.Add("ProductName", OracleDbType.Varchar2).Value = product.ProductName ?? (object)DBNull.Value;
-                    cmd.Parameters.Add("QuantityPerUnit", OracleDbType.Varchar2).Value = product.QuantityPerUnit ?? (object)DBNull.Value;
-                    cmd.Parameters.Add("UnitPrice", OracleDbType.Decimal).Value = product.UnitPrice.HasValue ? (object)product.UnitPrice.Value : DBNull.Value;
-                    cmd.Parameters.Add("UnitsInStock", OracleDbType.Int32).Value = product.UnitsInStock.HasValue ? (object)product.UnitsInStock.Value : DBNull.Value;
-                    cmd.Parameters.Add("UnitsOnOrder", OracleDbType.Int32).Value = product.UnitsOnOrder.HasValue ? (object)product.UnitsOnOrder.Value : DBNull.Value;
-                    cmd.Parameters.Add("ProductID", OracleDbType.Int32).Value = product.ProductID;
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        cmd.Parameters.Add("ProductName", OracleDbType.Varchar2).Value = product.ProductName ?? (object)DBNull.Value;
+                        cmd.Parameters.Add("QuantityPerUnit", OracleDbType.Varchar2).Value = product.QuantityPerUnit ?? (object)DBNull.Value;
+                        cmd.Parameters.Add("UnitPrice", OracleDbType.Decimal).Value = product.UnitPrice.HasValue ? (object)product.UnitPrice.Value : DBNull.Value;
+                        cmd.Parameters.Add("UnitsInStock", OracleDbType.Int32).Value = product.UnitsInStock.HasValue ? (object)product.UnitsInStock.Value : DBNull.Value;
+                        cmd.Parameters.Add("UnitsOnOrder", OracleDbType.Int32).Value = product.UnitsOnOrder.HasValue ? (object)product.UnitsOnOrder.Value : DBNull.Value;
+                        cmd.Parameters.Add("ProductID", OracleDbType.Int32).Value = product.ProductID;
 
-                    int result = cmd.ExecuteNonQuery();
-                    Connect.Instance.CloseConnection();
-                    return result > 0;
+                        int result = cmd.ExecuteNonQuery();
+                        return result > 0;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error updating product: " + ex.Message);
+                catch (Exception ex)
+                {
+                    throw new Exception("Error updating product: " + ex.Message);
+                }
             }
         }
 
@@ -117,21 +122,22 @@ namespace Shopping.Controller1
         {
             string query = "DELETE FROM \"TUNG\".\"PRODUCTS\" WHERE PRODUCTID = :ProductID";
 
-            try
+            using (OracleConnection conn = Connect.Instance.GetConnection())
             {
-                OracleConnection conn = Connect.Instance.GetConnection();
-                using (OracleCommand cmd = new OracleCommand(query, conn))
+                try
                 {
-                    cmd.Parameters.Add("ProductID", OracleDbType.Int32).Value = productId;
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        cmd.Parameters.Add("ProductID", OracleDbType.Int32).Value = productId;
 
-                    int result = cmd.ExecuteNonQuery();
-                    Connect.Instance.CloseConnection();
-                    return result > 0;
+                        int result = cmd.ExecuteNonQuery();
+                        return result > 0;
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error deleting product: " + ex.Message);
+                catch (Exception ex)
+                {
+                    throw new Exception("Error deleting product: " + ex.Message);
+                }
             }
         }
 
@@ -139,36 +145,36 @@ namespace Shopping.Controller1
         {
             string query = "SELECT * FROM \"TUNG\".\"PRODUCTS\" WHERE PRODUCTID = :ProductID";
 
-            try
+            using (OracleConnection conn = Connect.Instance.GetConnection())
             {
-                OracleConnection conn = Connect.Instance.GetConnection();
-                using (OracleCommand cmd = new OracleCommand(query, conn))
+                try
                 {
-                    cmd.Parameters.Add("ProductID", OracleDbType.Int32).Value = productId;
-
-                    using (OracleDataReader reader = cmd.ExecuteReader())
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
-                        if (reader.Read())
+                        cmd.Parameters.Add("ProductID", OracleDbType.Int32).Value = productId;
+
+                        using (OracleDataReader reader = cmd.ExecuteReader())
                         {
-                            Product product = new Product
+                            if (reader.Read())
                             {
-                                ProductID = Convert.ToInt32(reader["PRODUCTID"]),
-                                ProductName = reader["PRODUCTNAME"].ToString(),
-                                QuantityPerUnit = reader["QUANTITYPERUNIT"] != DBNull.Value ? reader["QUANTITYPERUNIT"].ToString() : null,
-                                UnitPrice = reader["UNITPRICE"] != DBNull.Value ? Convert.ToDecimal(reader["UNITPRICE"]) : (decimal?)null,
-                                UnitsInStock = reader["UNITSINSTOCK"] != DBNull.Value ? Convert.ToInt32(reader["UNITSINSTOCK"]) : (int?)null,
-                                UnitsOnOrder = reader["UNITSONORDER"] != DBNull.Value ? Convert.ToInt32(reader["UNITSONORDER"]) : (int?)null
-                            };
-                            return product;
+                                return new Product
+                                {
+                                    ProductID = Convert.ToInt32(reader["PRODUCTID"]),
+                                    ProductName = reader["PRODUCTNAME"].ToString(),
+                                    QuantityPerUnit = reader["QUANTITYPERUNIT"] != DBNull.Value ? reader["QUANTITYPERUNIT"].ToString() : null,
+                                    UnitPrice = reader["UNITPRICE"] != DBNull.Value ? Convert.ToDecimal(reader["UNITPRICE"]) : (decimal?)null,
+                                    UnitsInStock = reader["UNITSINSTOCK"] != DBNull.Value ? Convert.ToInt32(reader["UNITSINSTOCK"]) : (int?)null,
+                                    UnitsOnOrder = reader["UNITSONORDER"] != DBNull.Value ? Convert.ToInt32(reader["UNITSONORDER"]) : (int?)null
+                                };
+                            }
+                            return null;
                         }
                     }
                 }
-                Connect.Instance.CloseConnection();
-                return null;
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error getting product: " + ex.Message);
+                catch (Exception ex)
+                {
+                    throw new Exception("Error getting product: " + ex.Message);
+                }
             }
         }
     }

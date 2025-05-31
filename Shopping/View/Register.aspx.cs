@@ -4,12 +4,8 @@ using System.Linq;
 using System.Web;
 using System.Web.UI;
 using System.Web.UI.WebControls;
-
-using System;
-using System.Web.UI.WebControls;
 using Shopping.Controller1;
 using Shopping.Model1;
-using System.Web;
 
 namespace Shopping.View
 {
@@ -25,19 +21,40 @@ namespace Shopping.View
                 Session.Clear();
                 // Clear any existing error messages
                 lblError.Text = string.Empty;
+                // Clear any existing validation messages
+                cvUsername.Visible = false;
+                cvEmail.Visible = false;
             }
         }
 
-        protected void ValidateUsername(object source, ServerValidateEventArgs args)
+        protected void cvUsername_ServerValidate(object source, System.Web.UI.WebControls.ServerValidateEventArgs args)
         {
             string username = args.Value;
-            args.IsValid = !userController.IsUsernameExists(username);
+            if (!string.IsNullOrEmpty(username))
+            {
+                args.IsValid = !userController.IsUsernameExists(username);
+            }
         }
 
-        protected void ValidateEmail(object source, ServerValidateEventArgs args)
+        protected void cvEmail_ServerValidate(object source, System.Web.UI.WebControls.ServerValidateEventArgs args)
         {
             string email = args.Value;
-            args.IsValid = !userController.IsEmailExists(email);
+            if (!string.IsNullOrEmpty(email))
+            {
+                args.IsValid = !userController.IsEmailExists(email);
+            }
+        }
+
+        protected void txtUsername_TextChanged(object sender, EventArgs e)
+        {
+            cvUsername.Visible = true;
+            Page.Validate("cvUsername");
+        }
+
+        protected void txtEmail_TextChanged(object sender, EventArgs e)
+        {
+            cvEmail.Visible = true;
+            Page.Validate("cvEmail");
         }
 
         protected void btnRegister_Click(object sender, EventArgs e)

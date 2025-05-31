@@ -138,6 +138,9 @@
   <ItemGroup>
     <Content Include="About.aspx" />
     <Content Include="Admin\Adminpage.aspx" />
+    <Content Include="Admin\EmployeeEdit1.aspx" />
+    <Content Include="Admin\EmployeeList1.aspx" />
+    <Content Include="Admin\Product.aspx" />
     <Content Include="Contact.aspx" />
     <Content Include="Content\bootstrap-grid.css" />
     <Content Include="Content\bootstrap-grid.min.css" />
@@ -187,6 +190,7 @@
     <Content Include="Content\bootstrap-grid.rtl.css.map" />
     <Content Include="Content\bootstrap-grid.min.css.map" />
     <Content Include="Content\bootstrap-grid.css.map" />
+    <Content Include="Admin\AdminLayout.Master" />
     <None Include="Oracle.DataAccess.Common.Configuration.Section.xsd">
       <SubType>Designer</SubType>
     </None>
@@ -223,19 +227,46 @@
     <Content Include="Site.Master" />
     <Content Include="ViewSwitcher.ascx" />
     <Content Include="View\Login.aspx" />
-    <Content Include="View\Product.aspx" />
     <Content Include="View\Register.aspx" />
     <Content Include="Web.config" />
     <Content Include="Bundle.config" />
     <Content Include="Site.Mobile.Master" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Admin\AdminLayout.Master.cs">
+      <DependentUpon>AdminLayout.Master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\AdminLayout.Master.designer.cs">
+      <DependentUpon>AdminLayout.Master</DependentUpon>
+    </Compile>
     <Compile Include="Admin\Adminpage.aspx.cs">
       <DependentUpon>Adminpage.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
     <Compile Include="Admin\Adminpage.aspx.designer.cs">
       <DependentUpon>Adminpage.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\EmployeeEdit1.aspx.cs">
+      <DependentUpon>EmployeeEdit1.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\EmployeeEdit1.aspx.designer.cs">
+      <DependentUpon>EmployeeEdit1.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\EmployeeList1.aspx.cs">
+      <DependentUpon>EmployeeList1.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\EmployeeList1.aspx.designer.cs">
+      <DependentUpon>EmployeeList1.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\Product.aspx.cs">
+      <DependentUpon>Product.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\Product.aspx.designer.cs">
+      <DependentUpon>Product.aspx</DependentUpon>
     </Compile>
     <Compile Include="App_Start\BundleConfig.cs" />
     <Compile Include="About.aspx.cs">
@@ -253,6 +284,7 @@
     <Compile Include="Contact.aspx.designer.cs">
       <DependentUpon>Contact.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Controller1\EmployeeController.cs" />
     <Compile Include="Controller1\ProductController.cs" />
     <Compile Include="Controller1\UserController.cs" />
     <Compile Include="DataAccess1\Connect.cs" />
@@ -297,13 +329,6 @@
     </Compile>
     <Compile Include="View\Login.aspx.designer.cs">
       <DependentUpon>Login.aspx</DependentUpon>
-    </Compile>
-    <Compile Include="View\Product.aspx.cs">
-      <DependentUpon>Product.aspx</DependentUpon>
-      <SubType>ASPXCodeBehind</SubType>
-    </Compile>
-    <Compile Include="View\Product.aspx.designer.cs">
-      <DependentUpon>Product.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\Register.aspx.cs">
       <DependentUpon>Register.aspx</DependentUpon>

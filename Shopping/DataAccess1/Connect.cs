@@ -8,19 +8,9 @@ namespace Shopping.DataAccess1
     {
         private static string connectionString = ConfigurationManager.ConnectionStrings["OracleConn"].ConnectionString;
         private static Connect instance;
-        private OracleConnection connection;
+        private static readonly object lockObject = new object();
 
-        private Connect()
-        {
-            try
-            {
-                connection = new OracleConnection(connectionString);
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error initializing database connection: " + ex.Message);
-            }
-        }
+        private Connect() { }
 
         public static Connect Instance
         {
@@ -28,7 +18,13 @@ namespace Shopping.DataAccess1
             {
                 if (instance == null)
                 {
-                    instance = new Connect();
+                    lock (lockObject)
+                    {
+                        if (instance == null)
+                        {
+                            instance = new Connect();
+                        }
+                    }
                 }
                 return instance;
             }
@@ -38,10 +34,8 @@ namespace Shopping.DataAccess1
         {
             try
             {
-                if (connection.State != System.Data.ConnectionState.Open)
-                {
-                    connection.Open();
-                }
+                var connection = new OracleConnection(connectionString);
+                connection.Open();
                 return connection;
             }
             catch (Exception ex)
@@ -50,27 +44,12 @@ namespace Shopping.DataAccess1
             }
         }
 
-        public void CloseConnection()
+        // Optional helper methods for common database operations
+        public OracleDataReader ExecuteQuery(string query, OracleConnection connection)
         {
             try
             {
-                if (connection != null && connection.State == System.Data.ConnectionState.Open)
-                {
-                    connection.Close();
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception("Error closing database connection: " + ex.Message);
-            }
-        }
-
-        // Method to execute a query and return results
-        public OracleDataReader ExecuteQuery(string query)
-        {
-            try
-            {
-                OracleCommand command = new OracleCommand(query, GetConnection());
+                OracleCommand command = new OracleCommand(query, connection);
                 return command.ExecuteReader();
             }
             catch (Exception ex)
@@ -79,12 +58,11 @@ namespace Shopping.DataAccess1
             }
         }
 
-        // Method to execute a non-query command (INSERT, UPDATE, DELETE)
-        public int ExecuteNonQuery(string query)
+        public int ExecuteNonQuery(string query, OracleConnection connection)
         {
             try
             {
-                OracleCommand command = new OracleCommand(query, GetConnection());
+                OracleCommand command = new OracleCommand(query, connection);
                 return command.ExecuteNonQuery();
             }
             catch (Exception ex)
@@ -93,12 +71,11 @@ namespace Shopping.DataAccess1
             }
         }
 
-        // Method to execute a scalar query
-        public object ExecuteScalar(string query)
+        public object ExecuteScalar(string query, OracleConnection connection)
         {
             try
             {
-                OracleCommand command = new OracleCommand(query, GetConnection());
+                OracleCommand command = new OracleCommand(query, connection);
                 return command.ExecuteScalar();
             }
             catch (Exception ex)

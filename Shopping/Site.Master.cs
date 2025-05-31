@@ -13,5 +13,15 @@ namespace Shopping
         {
 
         }
+
+        protected void btnLogout_Click(object sender, EventArgs e)
+        {
+            // Clear all session variables
+            Session.Clear();
+            Session.Abandon();
+
+            // Redirect to login page
+            Response.Redirect("~/View/Login.aspx");
+        }
     }
 }

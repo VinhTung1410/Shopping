@@ -9,10 +9,11 @@
 
 namespace Shopping.View
 {
-
-
     public partial class Register
     {
+        /// <summary>
+        /// Form controls
+        /// </summary>
         protected global::System.Web.UI.WebControls.TextBox txtFirstName;
         protected global::System.Web.UI.WebControls.TextBox txtLastName;
         protected global::System.Web.UI.WebControls.TextBox txtAddress;
@@ -23,5 +24,7 @@ namespace Shopping.View
         protected global::System.Web.UI.WebControls.Button btnRegister;
         protected global::System.Web.UI.WebControls.Label lblMessage;
         protected global::System.Web.UI.WebControls.Label lblError;
+        protected global::System.Web.UI.WebControls.CustomValidator cvUsername;
+        protected global::System.Web.UI.WebControls.CustomValidator cvEmail;
     }
 }

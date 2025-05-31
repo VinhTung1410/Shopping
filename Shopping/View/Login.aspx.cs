@@ -1,5 +1,6 @@
 ﻿using System;
 using Shopping.Controller1;
+using Shopping.Model1;
 
 namespace Shopping.View
 {
@@ -27,8 +28,29 @@ namespace Shopping.View
 
                     if (userController.ValidateLogin(username, password))
                     {
-                        Session["Username"] = username;
-                        Response.Redirect("~/Default.aspx");
+                        // Get user details including role
+                        User user = userController.GetUserByUsername(username);
+                        if (user != null)
+                        {
+                            // Store user information in session
+                            Session["Username"] = username;
+                            Session["UserID"] = user.UserID;
+                            Session["RoleID"] = user.RoleID;
+
+                            // Redirect based on role
+                            if (user.RoleID == 1) // Admin role
+                            {
+                                Response.Redirect("~/Admin/Adminpage.aspx");
+                            }
+                            else
+                            {
+                                Response.Redirect("~/Default.aspx");
+                            }
+                        }
+                        else
+                        {
+                            lblMessage.Text = "User information not found.";
+                        }
                     }
                     else
                     {

@@ -1,4 +1,4 @@
-﻿<%@ Page Title="Product List" Language="C#" MasterPageFile="~/Site.Master" AutoEventWireup="true" CodeBehind="Product.aspx.cs" Inherits="Shopping.View.Product" %>
+﻿<%@ Page Title="Product List" Language="C#" MasterPageFile="~/Admin/AdminLayout.master" AutoEventWireup="true" CodeBehind="Product.aspx.cs" Inherits="Shopping.Admin.Product" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
@@ -157,7 +157,9 @@
     <asp:Panel ID="pnlMessage" runat="server" Visible="false" CssClass="alert alert-success">
         <asp:Literal ID="litMessage" runat="server"></asp:Literal>
     </asp:Panel>
+</asp:Content>
 
+<asp:Content ID="Content2" ContentPlaceHolderID="Scripts" runat="server">
     <script type="text/javascript">
         $(document).ready(function () {
             // Function to check input and update asterisk

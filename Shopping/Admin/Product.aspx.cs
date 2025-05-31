@@ -5,7 +5,7 @@ using System.Web.UI.WebControls;
 using Shopping.Controller1;
 using Shopping.Model1;
 
-namespace Shopping.View
+namespace Shopping.Admin
 {
     public partial class Product : System.Web.UI.Page
     {

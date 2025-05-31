@@ -45,8 +45,7 @@
                 <div class="container">
                     <div class="d-flex align-items-center">
                         <a class="navbar-brand" runat="server" href="~/">Shopee Fake</a>
-                        <ul class="navbar-nav main-nav">
-                            <li class="nav-item"><a class="nav-link" runat="server" href="~/View/Product">Product</a></li>
+                        <ul class="navbar-nav main-nav">             
                             <li class="nav-item"><a class="nav-link" runat="server" href="~/About">About</a></li>
                             <li class="nav-item"><a class="nav-link" runat="server" href="~/Contact">Contact</a></li>
                         </ul>
@@ -59,9 +58,17 @@
                     
                     <div class="collapse navbar-collapse d-sm-inline-flex justify-content-end">
                         <ul class="navbar-nav auth-nav mb-2 mb-lg-0 flex-row">
-                            <li class="nav-item"><a class="nav-link" runat="server" href="~/View/Login">Login</a></li>
-                            <li class="nav-item"><a class="nav-link" runat="server" href="~/View/Register">Register</a></li>
-                            <li class="nav-item"><a class="nav-link" runat="server" href="~/Default">Logout</a></li>
+                            <% if (Session["UserID"] == null) { %>
+                                <li class="nav-item"><a class="nav-link" runat="server" href="~/View/Login">Login</a></li>
+                                <li class="nav-item"><a class="nav-link" runat="server" href="~/View/Register">Register</a></li>
+                            <% } else { %>
+                                <li class="nav-item">
+                                    <span class="nav-link">Welcome, <%= Session["Username"] %></span>
+                                </li>
+                                <li class="nav-item">
+                                    <asp:LinkButton ID="btnLogout" runat="server" CssClass="nav-link" OnClick="btnLogout_Click">Logout</asp:LinkButton>
+                                </li>
+                            <% } %>
                         </ul>
                     </div>
                 </div>

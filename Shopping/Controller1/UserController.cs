@@ -28,11 +28,6 @@ namespace Shopping.Controller1
             {
                 throw new Exception("Error checking username: " + ex.Message);
             }
-            finally
-            {
-                Connect.Instance.CloseConnection();
-            }
-
         }
 
         public bool IsEmailExists(string email)
@@ -66,11 +61,6 @@ namespace Shopping.Controller1
                 // Trong trường hợp lỗi, cho phép tiếp tục đăng ký
                 return false;
             }
-            finally
-            {
-                Connect.Instance.CloseConnection();
-            }
-
         }
 
         public bool RegisterUser(User user, Employee employee)
@@ -130,25 +120,16 @@ namespace Shopping.Controller1
                     transaction.Rollback();
                     throw new Exception("Error registering user: " + ex.Message);
                 }
-                finally
-                {
-                    Connect.Instance.CloseConnection();
-                }
             }
         }
 
         public bool ValidateLogin(string username, string password)
         {
             string query = "SELECT COUNT(*) FROM USERS WHERE USERNAME = :Username AND PASSWORDHASH = :PASSWORDHASH";
-            try
+            using (OracleConnection conn = Connect.Instance.GetConnection())
             {
-                using (OracleConnection conn = Connect.Instance.GetConnection())
+                try
                 {
-                    if (conn.State != System.Data.ConnectionState.Open)
-                    {
-                        conn.Open();
-                    }
-                    
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
                         cmd.Parameters.Add("Username", OracleDbType.Varchar2).Value = username;
@@ -157,10 +138,49 @@ namespace Shopping.Controller1
                         return count > 0;
                     }
                 }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error validating login: " + ex.Message);
+                }
             }
-            catch (Exception ex)
+        }
+
+        public User GetUserByUsername(string username)
+        {
+            string query = @"SELECT U.USERID, U.USERNAME, U.EMAIL, U.ROLEID, U.EMPLOYEEID, U.ISACTIVE, 
+                           E.FIRSTNAME, E.LASTNAME 
+                           FROM USERS U 
+                           LEFT JOIN EMPLOYEES E ON U.EMPLOYEEID = E.EMPLOYEEID 
+                           WHERE U.USERNAME = :Username";
+            using (OracleConnection conn = Connect.Instance.GetConnection())
             {
-                throw new Exception("Error validating login: " + ex.Message);
+                try
+                {
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        cmd.Parameters.Add("Username", OracleDbType.Varchar2).Value = username;
+                        using (OracleDataReader reader = cmd.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                return new User
+                                {
+                                    UserID = Convert.ToInt32(reader["USERID"]),
+                                    UserName = reader["USERNAME"].ToString(),
+                                    Email = reader["EMAIL"].ToString(),
+                                    RoleID = Convert.ToInt32(reader["ROLEID"]),
+                                    EmployeeID = reader["EMPLOYEEID"] != DBNull.Value ? Convert.ToInt32(reader["EMPLOYEEID"]) : 0,
+                                    IsActive = Convert.ToInt32(reader["ISACTIVE"]) == 1
+                                };
+                            }
+                            return null;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error getting user details: " + ex.Message);
+                }
             }
         }
     }

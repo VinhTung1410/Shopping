@@ -11,21 +11,25 @@ namespace Shopping.Admin
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            //if (!IsPostBack)
-            //{
-            //    // Check if user is authenticated and has admin role
-            //    if (Session["Username"] == null || Session["RoleID"].ToString() != "1")
-            //    {
-            //        Response.Redirect("~/View/Login.aspx");
-            //        return;
-            //    }
+            // Check if user is logged in and has admin role
+            if (Session["Username"] == null || Session["RoleID"] == null || (int)Session["RoleID"] != 1)
+            {
+                Response.Redirect("~/View/Login.aspx");
+                return;
+            }
 
-            //    // Set logged in user name
-            //    lblLoggedInUser.Text = Session["Username"].ToString();
+            if (!IsPostBack)
+            {
+                // Set logged in user name in master page
+                Label lblLoggedInUser = Master.FindControl("lblLoggedInUser") as Label;
+                if (lblLoggedInUser != null)
+                {
+                    lblLoggedInUser.Text = Session["Username"].ToString();
+                }
 
-            //    LoadDashboardData();
-            //    LoadRecentOrders();
-            //}
+                LoadDashboardData();
+                LoadRecentOrders();
+            }
         }
 
         protected void btnLogout_Click(object sender, EventArgs e)
