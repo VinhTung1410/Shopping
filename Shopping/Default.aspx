@@ -23,32 +23,34 @@
                 <div class="featured-slider">
                     <div class="slider-container">
                         <div class="slider-track">
-                            <% for (int i = 1; i <= 10; i++) { %>
-                            <div class="product-card">
-                                <div class="product-image">
-                                    <img src="https://placehold.co/240x320" alt="Product <%= i %>">
-                                    <div class="product-overlay">
-                                        <div class="overlay-content">
-                                            <span class="status">New</span>
-                                            <div class="action-buttons">
-                                                <button class="btn-action"><i class="fas fa-heart"></i></button>
-                                                <button class="btn-action"><i class="fas fa-shopping-cart"></i></button>
+                            <asp:Repeater ID="FeaturedProductsRepeater" runat="server">
+                                <ItemTemplate>
+                                    <div class="product-card">
+                                        <div class="product-image">
+                                            <img src='<%# GetFirstProductImage(Container.DataItem) %>' 
+                                                 alt='<%# Eval("ProductName") %>'
+                                                 onerror="this.onerror=null; this.src='Content/images/no-image.jpg';"
+                                                 class="img-fluid product-img" />
+                                            <div class="product-overlay">
+                                                <div class="overlay-content">
+                                                    <span class="status">New</span>
+                                                    <div class="action-buttons">
+                                                        <button class="btn-action"><i class="fas fa-heart"></i></button>
+                                                        <button class="btn-action"><i class="fas fa-shopping-cart"></i></button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="product-info">
+                                            <h3 class="product-title"><%# Eval("ProductName") %></h3>
+                                            <div class="product-meta">
+                                                <span class="price"><%# String.Format("{0:N0}", Eval("UnitPrice")) %></span>
+                                                <span class="unit"><%# Eval("QuantityPerUnit") %></span>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="product-info">
-                                    <h3 class="product-title">Sản phẩm <%= i %></h3>
-                                    <div class="product-meta">
-                                        <span class="price"><%=String.Format("{0:N0}", i * 199000)%>đ</span>
-                                        <span class="rating">
-                                            <i class="fas fa-star"></i>
-                                            <%= (4 + (i % 10) * 0.1).ToString("F1") %>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <% } %>
+                                </ItemTemplate>
+                            </asp:Repeater>
                         </div>
                     </div>
                 </div>
@@ -79,11 +81,17 @@
                                 <div class="product-image">
                                     <a href="#" class="product-link">
                                         <div class="image-container">
-                                            <img src='<%# Eval("ImageUrl") %>' alt='<%# Eval("Name") %>' class="main-image">
-                                            <img src='<%# Eval("HoverImageUrl") %>' alt='<%# Eval("Name") %>' class="hover-image">
+                                            <img src='<%# GetFirstProductImage(Container.DataItem) %>' 
+                                                 alt='<%# Eval("ProductName") %>'
+                                                 onerror="this.onerror=null; this.src='Content/images/no-image.jpg';"
+                                                 class="main-image product-img" />
+                                            <img src='<%# GetFirstProductImage(Container.DataItem) %>' 
+                                                 alt='<%# Eval("ProductName") %>'
+                                                 onerror="this.onerror=null; this.src='Content/images/no-image.jpg';"
+                                                 class="hover-image product-img" />
                                         </div>
                                         <%# Eval("IsNew").ToString().ToLower() == "true" ? "<span class=\"badge-new\">New</span>" : "" %>
-                                        <%# Eval("Discount").ToString() != "0" ? "<span class=\"badge-discount\">-" + Eval("Discount") + "%</span>" : "" %>
+                                        <%# Convert.ToInt32(Eval("Discount")) > 0 ? "<span class=\"badge-discount\">-" + Eval("Discount") + "%</span>" : "" %>
                                     </a>
                                     <div class="product-actions">
                                         <button class="btn-wishlist" title="Thêm vào yêu thích">
@@ -95,18 +103,18 @@
                                     </div>
                                 </div>
                                 <div class="product-info">
-                                    <div class="color-options">
-                                        <%# GetColorOptionsHtml(Eval("ColorOptions") as List<string>) %>
-                                    </div>
                                     <h3 class="product-title">
-                                        <a href="#"><%# Eval("Name") %></a>
+                                        <a href="#"><%# Eval("ProductName") %></a>
                                     </h3>
-                                    <div class="product-price">
-                                        <span class="current-price"><%# String.Format("{0:N0}đ", Eval("CurrentPrice")) %></span>
-                                        <%# Eval("OriginalPrice").ToString() != Eval("CurrentPrice").ToString() ? 
-                                            "<span class=\"original-price\">" + String.Format("{0:N0}đ", Eval("OriginalPrice")) + "</span>" : "" %>
+                                    <div class="product-meta">
+                                        <span class="unit"><%# Eval("QuantityPerUnit") %></span>
                                     </div>
-                                    <%# Eval("HasPromotion").ToString().ToLower() == "true" ? 
+                                    <div class="product-price">
+                                        <span class="current-price"><%# String.Format("{0:N0}", Eval("UnitPrice")) %></span>
+                                        <%# Convert.ToDecimal(Eval("OriginalPrice")) != Convert.ToDecimal(Eval("UnitPrice")) ? 
+                                            "<span class=\"original-price\">" + String.Format("{0:N0}", Eval("OriginalPrice")) + "</span>" : "" %>
+                                    </div>
+                                    <%# Convert.ToBoolean(Eval("HasPromotion")) ? 
                                         "<div class=\"promotion-tag\">Áp dụng Giảm Thêm 40%*</div>" : "" %>
                                 </div>
                             </div>
@@ -291,12 +299,45 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 0.5rem;
             font-size: 0.875rem;
         }
 
-        .price {
+        .unit {
+            color: #666;
+            font-size: 0.875rem;
+        }
+
+        .price, .current-price {
             color: #ff6b6b;
             font-weight: 600;
+            font-size: 1rem;
+            position: relative;
+        }
+
+        .price::before, 
+        .current-price::before {
+            content: "$";
+            font-size: 0.8em;
+            position: relative;
+            top: -0.1em;
+            margin-right: 0.1em;
+        }
+
+        .original-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.875rem;
+            margin-left: 0.5rem;
+            position: relative;
+        }
+
+        .original-price::before {
+            content: "$";
+            font-size: 0.8em;
+            position: relative;
+            top: -0.1em;
+            margin-right: 0.1em;
         }
 
         .rating {
@@ -465,17 +506,6 @@
             margin-bottom: 0.25rem;
         }
 
-        .current-price {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .original-price {
-            text-decoration: line-through;
-            color: #999;
-            font-size: 0.875rem;
-        }
-
         .promotion-tag {
             font-size: 0.75rem;
             color: #ff0000;
@@ -503,6 +533,13 @@
             .current-price {
                 font-size: 0.875rem;
             }
+        }
+
+        .product-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
         }
     </style>
 

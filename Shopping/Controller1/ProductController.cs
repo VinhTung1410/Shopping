@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Web;
 using Oracle.ManagedDataAccess.Client;
 using Shopping.DataAccess1;
 using Shopping.Model1;
@@ -32,6 +33,10 @@ namespace Shopping.Controller1
                                 UnitsInStock = reader["UNITSINSTOCK"] != DBNull.Value ? Convert.ToInt32(reader["UNITSINSTOCK"]) : (int?)null,
                                 UnitsOnOrder = reader["UNITSONORDER"] != DBNull.Value ? Convert.ToInt32(reader["UNITSONORDER"]) : (int?)null
                             };
+
+                            // Load product images
+                            product.ProductImages = GetProductImages(product.ProductID);
+                            
                             products.Add(product);
                         }
                     }
@@ -39,7 +44,8 @@ namespace Shopping.Controller1
                 }
                 catch (Exception ex)
                 {
-                    throw new Exception("Error getting products: " + ex.Message);
+                    System.Diagnostics.Debug.WriteLine($"Error getting products: {ex.Message}");
+                    return new List<Product>(); // Return empty list instead of throwing
                 }
             }
         }
@@ -141,8 +147,138 @@ namespace Shopping.Controller1
             }
         }
 
+        public List<ProductImage> GetProductImages(int productId)
+        {
+            List<ProductImage> images = new List<ProductImage>();
+            string query = @"SELECT * FROM ""TUNG"".""PRODUCT_IMAGES"" WHERE PRODUCTID = :ProductID";
+
+            using (OracleConnection conn = Connect.Instance.GetConnection())
+            {
+                try
+                {
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        cmd.Parameters.Add("ProductID", OracleDbType.Int32).Value = productId;
+
+                        using (OracleDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                ProductImage image = new ProductImage
+                                {
+                                    ProductImageID = Convert.ToInt32(reader["PRODUCTIMAGEID"]),
+                                    ProductID = Convert.ToInt32(reader["PRODUCTID"]),
+                                    ImageUrl = reader["IMAGEURL"].ToString(),
+                                    OriginalFileName = reader["ORIGINALFILENAME"].ToString(),
+                                    FileSize = Convert.ToInt64(reader["FILESIZE"]),
+                                    ImageWidth = Convert.ToInt32(reader["IMAGEWIDTH"]),
+                                    ImageHeight = Convert.ToInt32(reader["IMAGEHEIGHT"])
+                                };
+                                images.Add(image);
+                            }
+                        }
+                    }
+                    return images;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error getting product images: " + ex.Message);
+                }
+            }
+        }
+
+        public bool AddProductImage(int productId, HttpPostedFile imageFile)
+        {
+            // Validate the image
+            var validationResult = ImageHelper.ValidateImage(imageFile);
+            if (!validationResult.IsValid)
+            {
+                throw new Exception(validationResult.ErrorMessage);
+            }
+
+            // Save the image to disk
+            string fileName = ImageHelper.SaveImage(imageFile, productId.ToString());
+
+            string query = @"INSERT INTO ""TUNG"".""PRODUCT_IMAGES"" 
+                (PRODUCTIMAGEID, PRODUCTID, IMAGEURL, ORIGINALFILENAME, FILESIZE, IMAGEWIDTH, IMAGEHEIGHT) 
+                VALUES (""TUNG"".""PRODUCT_IMAGES_SEQ"".NEXTVAL, :ProductID, :ImageUrl, :OriginalFileName, :FileSize, :ImageWidth, :ImageHeight)";
+
+            using (OracleConnection conn = Connect.Instance.GetConnection())
+            {
+                try
+                {
+                    using (OracleCommand cmd = new OracleCommand(query, conn))
+                    {
+                        cmd.Parameters.Add("ProductID", OracleDbType.Int32).Value = productId;
+                        cmd.Parameters.Add("ImageUrl", OracleDbType.Varchar2).Value = fileName;
+                        cmd.Parameters.Add("OriginalFileName", OracleDbType.Varchar2).Value = imageFile.FileName;
+                        cmd.Parameters.Add("FileSize", OracleDbType.Int64).Value = imageFile.ContentLength;
+                        cmd.Parameters.Add("ImageWidth", OracleDbType.Int32).Value = validationResult.ImageWidth;
+                        cmd.Parameters.Add("ImageHeight", OracleDbType.Int32).Value = validationResult.ImageHeight;
+
+                        int result = cmd.ExecuteNonQuery();
+                        return result > 0;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error adding product image: " + ex.Message);
+                }
+            }
+        }
+
+        public bool DeleteProductImage(int productImageId)
+        {
+            // First get the image details to delete the file
+            string getImageQuery = @"SELECT IMAGEURL FROM ""TUNG"".""PRODUCT_IMAGES"" WHERE PRODUCTIMAGEID = :ProductImageID";
+            string imageUrl = null;
+
+            using (OracleConnection conn = Connect.Instance.GetConnection())
+            {
+                try
+                {
+                    // Get image URL
+                    using (OracleCommand cmd = new OracleCommand(getImageQuery, conn))
+                    {
+                        cmd.Parameters.Add("ProductImageID", OracleDbType.Int32).Value = productImageId;
+                        imageUrl = cmd.ExecuteScalar()?.ToString();
+                    }
+
+                    if (string.IsNullOrEmpty(imageUrl))
+                    {
+                        return false;
+                    }
+
+                    // Delete from database
+                    string deleteQuery = @"DELETE FROM ""TUNG"".""PRODUCT_IMAGES"" WHERE PRODUCTIMAGEID = :ProductImageID";
+                    using (OracleCommand cmd = new OracleCommand(deleteQuery, conn))
+                    {
+                        cmd.Parameters.Add("ProductImageID", OracleDbType.Int32).Value = productImageId;
+                        int result = cmd.ExecuteNonQuery();
+
+                        if (result > 0)
+                        {
+                            // Delete physical file
+                            string imagePath = System.Web.HttpContext.Current.Server.MapPath("~/Image/" + imageUrl);
+                            if (System.IO.File.Exists(imagePath))
+                            {
+                                System.IO.File.Delete(imagePath);
+                            }
+                            return true;
+                        }
+                        return false;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Error deleting product image: " + ex.Message);
+                }
+            }
+        }
+
         public Product GetProductById(int productId)
         {
+            Product product = null;
             string query = "SELECT * FROM \"TUNG\".\"PRODUCTS\" WHERE PRODUCTID = :ProductID";
 
             using (OracleConnection conn = Connect.Instance.GetConnection())
@@ -157,19 +293,23 @@ namespace Shopping.Controller1
                         {
                             if (reader.Read())
                             {
-                                return new Product
+                                product = new Product
                                 {
                                     ProductID = Convert.ToInt32(reader["PRODUCTID"]),
                                     ProductName = reader["PRODUCTNAME"].ToString(),
                                     QuantityPerUnit = reader["QUANTITYPERUNIT"] != DBNull.Value ? reader["QUANTITYPERUNIT"].ToString() : null,
                                     UnitPrice = reader["UNITPRICE"] != DBNull.Value ? Convert.ToDecimal(reader["UNITPRICE"]) : (decimal?)null,
                                     UnitsInStock = reader["UNITSINSTOCK"] != DBNull.Value ? Convert.ToInt32(reader["UNITSINSTOCK"]) : (int?)null,
-                                    UnitsOnOrder = reader["UNITSONORDER"] != DBNull.Value ? Convert.ToInt32(reader["UNITSONORDER"]) : (int?)null
+                                    UnitsOnOrder = reader["UNITSONORDER"] != DBNull.Value ? Convert.ToInt32(reader["UNITSONORDER"]) : (int?)null,
+                                    ProductImages = new List<ProductImage>()
                                 };
+
+                                // Get images for this product
+                                product.ProductImages = GetProductImages(productId);
                             }
-                            return null;
                         }
                     }
+                    return product;
                 }
                 catch (Exception ex)
                 {

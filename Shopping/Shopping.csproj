@@ -285,6 +285,7 @@
       <DependentUpon>Contact.aspx</DependentUpon>
     </Compile>
     <Compile Include="Controller1\EmployeeController.cs" />
+    <Compile Include="Controller1\ImageHelper.cs" />
     <Compile Include="Controller1\ProductController.cs" />
     <Compile Include="Controller1\UserController.cs" />
     <Compile Include="DataAccess1\Connect.cs" />

@@ -11,6 +11,98 @@
         .valid-input::after {
             content: "";
         }
+        .product-image {
+            max-width: 150px;
+            max-height: 150px;
+            margin: 5px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            object-fit: cover;
+        }
+        .image-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            min-height: 100px;
+        }
+        .image-item {
+            position: relative;
+            display: inline-block;
+            border: 1px solid #ddd;
+            padding: 5px;
+            background: white;
+            border-radius: 5px;
+        }
+        .delete-image {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #dc3545;
+            color: white;
+            border: 2px solid white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .delete-image:hover {
+            background: #c82333;
+        }
+        .grid-image-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: flex-start;
+            padding: 5px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            min-height: 50px;
+        }
+        .grid-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+            padding: 2px;
+            background: white;
+        }
+        .upload-zone {
+            border: 2px dashed #ddd;
+            padding: 20px;
+            text-align: center;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+        .upload-zone:hover {
+            border-color: #007bff;
+            background: #e9ecef;
+        }
+        .image-preview {
+            margin-top: 10px;
+            display: none;
+        }
+        .image-count-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #17a2b8;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            min-width: 20px;
+            text-align: center;
+        }
     </style>
 
     <div class="card shadow border-0 my-4">
@@ -113,6 +205,35 @@
                                 CssClass="text-danger" />
                         </div>
                         <div class="mb-3">
+                            <label class="form-label">Product Images</label>
+                            <div class="upload-zone">
+                                <asp:FileUpload ID="fuProductImages" runat="server" CssClass="form-control" AllowMultiple="true" accept=".jpg,.jpeg" />
+                                <small class="text-muted d-block mt-2">Accepted formats: JPG only, Max size: 25MB, Max dimensions: 1500x1500</small>
+                            </div>
+                            <asp:Label ID="lblImageError" runat="server" CssClass="text-danger" Visible="false"></asp:Label>
+                            
+                            <div class="image-container">
+                                <asp:Repeater ID="rptProductImages" runat="server" OnItemCommand="rptProductImages_ItemCommand">
+                                    <ItemTemplate>
+                                        <div class="image-item">
+                                            <asp:Image ID="imgProduct" runat="server" 
+                                                ImageUrl='<%# ResolveUrl("~/Image/" + Eval("ImageUrl")) %>' 
+                                                CssClass="product-image" 
+                                                AlternateText='<%# Eval("OriginalFileName") %>'
+                                                ToolTip='<%# Eval("OriginalFileName") %>' />
+                                            <asp:LinkButton ID="btnDeleteImage" runat="server" 
+                                                CommandName="DeleteImage" 
+                                                CommandArgument='<%# Eval("ProductImageID") %>'
+                                                CssClass="delete-image"
+                                                OnClientClick="return confirm('Are you sure you want to delete this image?');">
+                                                <i class="bi bi-x"></i>
+                                            </asp:LinkButton>
+                                        </div>
+                                    </ItemTemplate>
+                                </asp:Repeater>
+                            </div>
+                        </div>
+                        <div class="mb-3">
                             <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn btn-primary" OnClick="btnSave_Click" />
                             <asp:Button ID="btnCancel" runat="server" Text="Cancel" CssClass="btn btn-secondary" OnClick="btnCancel_Click" CausesValidation="false" />
                         </div>
@@ -126,7 +247,7 @@
             </div>
 
             <asp:GridView ID="gvProducts" runat="server" CssClass="table table-bordered table-striped" 
-                AutoGenerateColumns="False" OnRowCommand="gvProducts_RowCommand">
+                AutoGenerateColumns="False" OnRowCommand="gvProducts_RowCommand" OnRowDataBound="gvProducts_RowDataBound">
                 <Columns>
                     <asp:BoundField DataField="ProductID" HeaderText="Product ID" />
                     <asp:BoundField DataField="ProductName" HeaderText="Product Name" />
@@ -134,6 +255,26 @@
                     <asp:BoundField DataField="UnitPrice" HeaderText="Unit Price" DataFormatString="{0:C2}" />
                     <asp:BoundField DataField="UnitsInStock" HeaderText="Units In Stock" />
                     <asp:BoundField DataField="UnitsOnOrder" HeaderText="Units On Order" />
+                    <asp:TemplateField HeaderText="Images">
+                        <ItemTemplate>
+                            <div class="grid-image-container position-relative">
+                                <asp:Repeater ID="rptThumbnails" runat="server">
+                                    <ItemTemplate>
+                                        <div class="image-item">
+                                            <asp:Image ID="imgProduct" runat="server" 
+                                                ImageUrl='<%# ResolveUrl("~/Image/" + Eval("ImageUrl")) %>' 
+                                                CssClass="grid-image" 
+                                                AlternateText='<%# Eval("OriginalFileName") %>'
+                                                ToolTip='<%# Eval("OriginalFileName") %>' />
+                                        </div>
+                                    </ItemTemplate>
+                                </asp:Repeater>
+                                <asp:Label ID="lblImageCount" runat="server" CssClass="image-count-badge" Visible='<%# ((ICollection<Shopping.Model1.ProductImage>)((Shopping.Model1.Product)Container.DataItem).ProductImages).Count > 0 %>'>
+                                    <%# ((ICollection<Shopping.Model1.ProductImage>)((Shopping.Model1.Product)Container.DataItem).ProductImages).Count %>
+                                </asp:Label>
+                            </div>
+                        </ItemTemplate>
+                    </asp:TemplateField>
                     <asp:TemplateField HeaderText="Actions">
                         <ItemTemplate>
                             <div class="btn-group" role="group">
@@ -162,7 +303,6 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="Scripts" runat="server">
     <script type="text/javascript">
         $(document).ready(function () {
-            // Function to check input and update asterisk
             function updateAsterisk(input) {
                 var label = $("label[for='" + input.id + "']");
                 if ($(input).val()) {
@@ -172,7 +312,6 @@
                 }
             }
 
-            // Add event listeners to all required inputs
             $("#<%= txtProductID.ClientID %>").on("input", function() { updateAsterisk(this); });
             $("#<%= txtProductName.ClientID %>").on("input", function() { updateAsterisk(this); });
             $("#<%= txtQuantityPerUnit.ClientID %>").on("input", function() { updateAsterisk(this); });
@@ -180,9 +319,18 @@
             $("#<%= txtUnitsInStock.ClientID %>").on("input", function() { updateAsterisk(this); });
             $("#<%= txtUnitsOnOrder.ClientID %>").on("input", function() { updateAsterisk(this); });
 
-            // Initial check on page load
             $("input[type='text'], input[type='number']").each(function() {
                 updateAsterisk(this);
+            });
+
+            // File upload preview
+            $("#<%= fuProductImages.ClientID %>").change(function () {
+                var fileUpload = $(this)[0];
+                if (fileUpload.files.length > 0) {
+                    $(".upload-zone").css("border-color", "#28a745");
+                } else {
+                    $(".upload-zone").css("border-color", "#ddd");
+                }
             });
         });
     </script>
