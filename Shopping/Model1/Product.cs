@@ -12,6 +12,8 @@ namespace Shopping.Model1
         [StringLength(100)]
         public string ProductName { get; set; }
 
+        public string Description { get; set; }
+
         public string QuantityPerUnit { get; set; }
 
         public decimal? UnitPrice { get; set; }

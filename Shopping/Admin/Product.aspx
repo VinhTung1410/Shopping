@@ -1,7 +1,8 @@
-﻿<%@ Page Title="Product List" Language="C#" MasterPageFile="~/Admin/AdminLayout.master" AutoEventWireup="true" CodeBehind="Product.aspx.cs" Inherits="Shopping.Admin.Product" %>
+﻿<%@ Page Title="Product List" Language="C#" MasterPageFile="~/Admin/AdminLayout.master" AutoEventWireup="true" CodeBehind="Product.aspx.cs" Inherits="Shopping.Admin.Product" ValidateRequest="false" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="MainContent" runat="server">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" />
+    <script src="https://cdn.ckeditor.com/4.22.1/standard/ckeditor.js"></script>
     <style>
         .required::after {
             content: "*";
@@ -102,6 +103,13 @@
             font-size: 12px;
             min-width: 20px;
             text-align: center;
+        }
+        .ck-editor__editable {
+            min-height: 200px;
+        }
+        #cke_txtDescription {
+            width: 100%;
+            margin-bottom: 20px;
         }
     </style>
 
@@ -205,6 +213,10 @@
                                 CssClass="text-danger" />
                         </div>
                         <div class="mb-3">
+                            <label for="txtDescription" class="form-label">Description</label>
+                            <asp:TextBox ID="txtDescription" runat="server" TextMode="MultiLine" CssClass="form-control" />
+                        </div>
+                        <div class="mb-3">
                             <label class="form-label">Product Images</label>
                             <div class="upload-zone">
                                 <asp:FileUpload ID="fuProductImages" runat="server" CssClass="form-control" AllowMultiple="true" accept=".jpg,.jpeg" />
@@ -234,7 +246,7 @@
                             </div>
                         </div>
                         <div class="mb-3">
-                            <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn btn-primary" OnClick="btnSave_Click" />
+                            <asp:Button ID="btnSave" runat="server" Text="Save" CssClass="btn btn-primary" OnClick="btnSave_Click" OnClientClick="return BeforeSubmit();" />
                             <asp:Button ID="btnCancel" runat="server" Text="Cancel" CssClass="btn btn-secondary" OnClick="btnCancel_Click" CausesValidation="false" />
                         </div>
                     </asp:Panel>
@@ -303,6 +315,31 @@
 <asp:Content ID="Content2" ContentPlaceHolderID="Scripts" runat="server">
     <script type="text/javascript">
         $(document).ready(function () {
+            // Initialize CKEditor with basic configuration
+            if (CKEDITOR.instances['<%= txtDescription.ClientID %>']) {
+                CKEDITOR.instances['<%= txtDescription.ClientID %>'].destroy();
+            }
+            
+            CKEDITOR.replace('<%= txtDescription.ClientID %>', {
+                height: '300px',
+                toolbar: [
+                    ['Source'],
+                    ['Bold', 'Italic', 'Underline', 'Strike'],
+                    ['NumberedList', 'BulletedList'],
+                    ['Outdent', 'Indent'],
+                    ['JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'],
+                    ['Link', 'Unlink'],
+                    ['Image', 'Table'],
+                    ['Format', 'Font', 'FontSize'],
+                    ['TextColor', 'BGColor'],
+                    ['Maximize']
+                ],
+                removeButtons: '',
+                language: 'en',
+                removePlugins: 'elementspath',
+                resize_enabled: false
+            });
+
             function updateAsterisk(input) {
                 var label = $("label[for='" + input.id + "']");
                 if ($(input).val()) {
@@ -333,6 +370,14 @@
                 }
             });
         });
+
+        // Add form submit handler to update CKEditor content
+        function BeforeSubmit() {
+            if (CKEDITOR.instances['<%= txtDescription.ClientID %>']) {
+                CKEDITOR.instances['<%= txtDescription.ClientID %>'].updateElement();
+            }
+            return true;
+        }
     </script>
 </asp:Content>
 

@@ -28,6 +28,7 @@ namespace Shopping.Controller1
                             {
                                 ProductID = Convert.ToInt32(reader["PRODUCTID"]),
                                 ProductName = reader["PRODUCTNAME"].ToString(),
+                                Description = reader["DESCRIPTION"] != DBNull.Value ? HttpUtility.HtmlDecode(reader["DESCRIPTION"].ToString()) : null,
                                 QuantityPerUnit = reader["QUANTITYPERUNIT"] != DBNull.Value ? reader["QUANTITYPERUNIT"].ToString() : null,
                                 UnitPrice = reader["UNITPRICE"] != DBNull.Value ? Convert.ToDecimal(reader["UNITPRICE"]) : (decimal?)null,
                                 UnitsInStock = reader["UNITSINSTOCK"] != DBNull.Value ? Convert.ToInt32(reader["UNITSINSTOCK"]) : (int?)null,
@@ -58,8 +59,8 @@ namespace Shopping.Controller1
             }
 
             string query = @"INSERT INTO ""TUNG"".""PRODUCTS"" 
-                (PRODUCTID, PRODUCTNAME, QUANTITYPERUNIT, UNITPRICE, UNITSINSTOCK, UNITSONORDER) 
-                VALUES (:ProductID, :ProductName, :QuantityPerUnit, :UnitPrice, :UnitsInStock, :UnitsOnOrder)";
+                (PRODUCTID, PRODUCTNAME, DESCRIPTION, QUANTITYPERUNIT, UNITPRICE, UNITSINSTOCK, UNITSONORDER) 
+                VALUES (:ProductID, :ProductName, :Description, :QuantityPerUnit, :UnitPrice, :UnitsInStock, :UnitsOnOrder)";
 
             using (OracleConnection conn = Connect.Instance.GetConnection())
             {
@@ -69,6 +70,7 @@ namespace Shopping.Controller1
                     {
                         cmd.Parameters.Add("ProductID", OracleDbType.Int32).Value = product.ProductID;
                         cmd.Parameters.Add("ProductName", OracleDbType.Varchar2).Value = product.ProductName ?? (object)DBNull.Value;
+                        cmd.Parameters.Add("Description", OracleDbType.Clob).Value = !string.IsNullOrEmpty(product.Description) ? HttpUtility.HtmlEncode(product.Description) : (object)DBNull.Value;
                         cmd.Parameters.Add("QuantityPerUnit", OracleDbType.Varchar2).Value = product.QuantityPerUnit ?? (object)DBNull.Value;
                         cmd.Parameters.Add("UnitPrice", OracleDbType.Decimal).Value = product.UnitPrice.HasValue ? (object)product.UnitPrice.Value : DBNull.Value;
                         cmd.Parameters.Add("UnitsInStock", OracleDbType.Int32).Value = product.UnitsInStock.HasValue ? (object)product.UnitsInStock.Value : DBNull.Value;
@@ -94,6 +96,7 @@ namespace Shopping.Controller1
 
             string query = @"UPDATE ""TUNG"".""PRODUCTS"" SET 
                 PRODUCTNAME = :ProductName,
+                DESCRIPTION = :Description,
                 QUANTITYPERUNIT = :QuantityPerUnit,
                 UNITPRICE = :UnitPrice,
                 UNITSINSTOCK = :UnitsInStock,
@@ -107,6 +110,7 @@ namespace Shopping.Controller1
                     using (OracleCommand cmd = new OracleCommand(query, conn))
                     {
                         cmd.Parameters.Add("ProductName", OracleDbType.Varchar2).Value = product.ProductName ?? (object)DBNull.Value;
+                        cmd.Parameters.Add("Description", OracleDbType.Clob).Value = !string.IsNullOrEmpty(product.Description) ? HttpUtility.HtmlEncode(product.Description) : (object)DBNull.Value;
                         cmd.Parameters.Add("QuantityPerUnit", OracleDbType.Varchar2).Value = product.QuantityPerUnit ?? (object)DBNull.Value;
                         cmd.Parameters.Add("UnitPrice", OracleDbType.Decimal).Value = product.UnitPrice.HasValue ? (object)product.UnitPrice.Value : DBNull.Value;
                         cmd.Parameters.Add("UnitsInStock", OracleDbType.Int32).Value = product.UnitsInStock.HasValue ? (object)product.UnitsInStock.Value : DBNull.Value;
@@ -297,6 +301,7 @@ namespace Shopping.Controller1
                                 {
                                     ProductID = Convert.ToInt32(reader["PRODUCTID"]),
                                     ProductName = reader["PRODUCTNAME"].ToString(),
+                                    Description = reader["DESCRIPTION"] != DBNull.Value ? reader["DESCRIPTION"].ToString() : null,
                                     QuantityPerUnit = reader["QUANTITYPERUNIT"] != DBNull.Value ? reader["QUANTITYPERUNIT"].ToString() : null,
                                     UnitPrice = reader["UNITPRICE"] != DBNull.Value ? Convert.ToDecimal(reader["UNITPRICE"]) : (decimal?)null,
                                     UnitsInStock = reader["UNITSINSTOCK"] != DBNull.Value ? Convert.ToInt32(reader["UNITSINSTOCK"]) : (int?)null,

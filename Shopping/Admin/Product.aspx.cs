@@ -71,11 +71,12 @@ namespace Shopping.Admin
                     var product = new Model1.Product
                     {
                         ProductID = productId,
-                        ProductName = txtProductName.Text,
-                        QuantityPerUnit = string.IsNullOrEmpty(txtQuantityPerUnit.Text) ? null : txtQuantityPerUnit.Text,
-                        UnitPrice = string.IsNullOrEmpty(txtUnitPrice.Text) ? null : (decimal?)Convert.ToDecimal(txtUnitPrice.Text),
-                        UnitsInStock = string.IsNullOrEmpty(txtUnitsInStock.Text) ? null : (int?)Convert.ToInt32(txtUnitsInStock.Text),
-                        UnitsOnOrder = string.IsNullOrEmpty(txtUnitsOnOrder.Text) ? null : (int?)Convert.ToInt32(txtUnitsOnOrder.Text)
+                        ProductName = txtProductName.Text.Trim(),
+                        Description = txtDescription.Text.Trim(),
+                        QuantityPerUnit = txtQuantityPerUnit.Text.Trim(),
+                        UnitPrice = decimal.Parse(txtUnitPrice.Text),
+                        UnitsInStock = int.Parse(txtUnitsInStock.Text),
+                        UnitsOnOrder = int.Parse(txtUnitsOnOrder.Text)
                     };
 
                     bool success;
@@ -196,6 +197,7 @@ namespace Shopping.Admin
                             txtProductID.Text = product.ProductID.ToString();
                             txtProductID.Enabled = false;
                             txtProductName.Text = product.ProductName;
+                            txtDescription.Text = product.Description;
                             txtQuantityPerUnit.Text = product.QuantityPerUnit;
                             txtUnitPrice.Text = product.UnitPrice?.ToString();
                             txtUnitsInStock.Text = product.UnitsInStock?.ToString();
@@ -259,6 +261,7 @@ namespace Shopping.Admin
         {
             txtProductID.Text = string.Empty;
             txtProductName.Text = string.Empty;
+            txtDescription.Text = string.Empty;
             txtQuantityPerUnit.Text = string.Empty;
             txtUnitPrice.Text = string.Empty;
             txtUnitsInStock.Text = string.Empty;

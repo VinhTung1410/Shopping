@@ -227,6 +227,7 @@
     <Content Include="Site.Master" />
     <Content Include="ViewSwitcher.ascx" />
     <Content Include="View\Login.aspx" />
+    <Content Include="View\ProductDetails.aspx" />
     <Content Include="View\Register.aspx" />
     <Content Include="Web.config" />
     <Content Include="Bundle.config" />
@@ -287,6 +288,7 @@
     <Compile Include="Controller1\EmployeeController.cs" />
     <Compile Include="Controller1\ImageHelper.cs" />
     <Compile Include="Controller1\ProductController.cs" />
+    <Compile Include="Controller1\ProductDetailsController.cs" />
     <Compile Include="Controller1\UserController.cs" />
     <Compile Include="DataAccess1\Connect.cs" />
     <Compile Include="Default.aspx.cs">
@@ -331,6 +333,13 @@
     <Compile Include="View\Login.aspx.designer.cs">
       <DependentUpon>Login.aspx</DependentUpon>
     </Compile>
+    <Compile Include="View\ProductDetails.aspx.cs">
+      <DependentUpon>ProductDetails.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\ProductDetails.aspx.designer.cs">
+      <DependentUpon>ProductDetails.aspx</DependentUpon>
+    </Compile>
     <Compile Include="View\Register.aspx.cs">
       <DependentUpon>Register.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
@@ -368,7 +377,7 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>53636</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>https://localhost:44382/</IISUrl>
+          <IISUrl>http://localhost:53636/</IISUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

@@ -28,8 +28,8 @@ namespace Shopping
             {
                 var products = productController.GetAllProducts();
 
-                // Load featured products
-                FeaturedProductsRepeater.DataSource = products.Take(10); // Take first 10 products for featured section
+                // Load featured products - take first 10 products
+                FeaturedProductsRepeater.DataSource = products.Take(10);
                 FeaturedProductsRepeater.DataBind();
 
                 // Load all products for grid

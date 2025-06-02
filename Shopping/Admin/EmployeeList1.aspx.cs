@@ -36,7 +36,6 @@ namespace Shopping.Admin
             }
             catch (Exception ex)
             {
-                System.Diagnostics.Debug.WriteLine($"Error loading employees: {ex.Message}");
                 ShowError("An error occurred while loading employees: " + ex.Message);
             }
         }
@@ -58,30 +57,59 @@ namespace Shopping.Admin
                 try
                 {
                     int employeeId = Convert.ToInt32(e.CommandArgument);
+                    System.Diagnostics.Debug.WriteLine($"Attempting to toggle status for employee ID: {employeeId}");
+
                     var employee = employeeController.GetEmployeeById(employeeId);
                     if (employee != null)
                     {
+                        System.Diagnostics.Debug.WriteLine($"Current employee status - IsActive: {employee.IsActive}, Role: {employee.RoleName}");
                         bool newStatus = !employee.IsActive;
-                        if (employeeController.ToggleEmployeeStatus(employeeId, newStatus))
+                        
+                        try
                         {
-                            LoadEmployees(); // Refresh the grid
+                            bool result = employeeController.ToggleEmployeeStatus(employeeId, newStatus);
+                            System.Diagnostics.Debug.WriteLine($"Toggle result: {result}");
+                            
+                            if (result)
+                            {
+                                LoadEmployees(); // Refresh the grid
+                                ShowSuccess($"Successfully {(newStatus ? "activated" : "deactivated")} employee {employee.FirstName} {employee.LastName}.");
+                            }
+                            else
+                            {
+                                ShowError($"Failed to {(newStatus ? "activate" : "deactivate")} employee {employee.FirstName} {employee.LastName}. Please try again.");
+                            }
                         }
-                        else
+                        catch (Exception ex)
                         {
-                            ShowError("Failed to update employee status.");
+                            System.Diagnostics.Debug.WriteLine($"Error during toggle: {ex.Message}");
+                            ShowError(ex.Message);
                         }
+                    }
+                    else
+                    {
+                        System.Diagnostics.Debug.WriteLine("Employee not found");
+                        ShowError("Employee not found.");
                     }
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Error toggling employee status: {ex.Message}");
-                    ShowError("An error occurred while updating employee status.");
+                    System.Diagnostics.Debug.WriteLine($"Unexpected error: {ex.Message}");
+                    ShowError("An unexpected error occurred: " + ex.Message);
                 }
             }
         }
 
         private void ShowError(string message)
         {
+            lblError.CssClass = "alert alert-danger d-block mb-3";
+            lblError.Text = message;
+            lblError.Visible = true;
+        }
+
+        private void ShowSuccess(string message)
+        {
+            lblError.CssClass = "alert alert-success d-block mb-3";
             lblError.Text = message;
             lblError.Visible = true;
         }

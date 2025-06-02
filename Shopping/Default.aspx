@@ -27,22 +27,26 @@
                                 <ItemTemplate>
                                     <div class="product-card">
                                         <div class="product-image">
-                                            <img src='<%# GetFirstProductImage(Container.DataItem) %>' 
-                                                 alt='<%# Eval("ProductName") %>'
-                                                 onerror="this.onerror=null; this.src='Content/images/no-image.jpg';"
-                                                 class="img-fluid product-img" />
+                                            <a href='<%# ResolveUrl("~/View/ProductDetails.aspx?productId=" + Eval("ProductID")) %>'>
+                                                <img src='<%# GetFirstProductImage(Container.DataItem) %>' 
+                                                     alt='<%# Eval("ProductName") %>'
+                                                     onerror="this.onerror=null; this.src='Content/images/no-image.jpg';"
+                                                     class="img-fluid product-img" />
+                                            </a>
                                             <div class="product-overlay">
                                                 <div class="overlay-content">
                                                     <span class="status">New</span>
                                                     <div class="action-buttons">
                                                         <button class="btn-action"><i class="fas fa-heart"></i></button>
-                                                        <button class="btn-action"><i class="fas fa-shopping-cart"></i></button>
+                                                        <a href='<%# ResolveUrl("~/View/ProductDetails.aspx?productId=" + Eval("ProductID")) %>' class="btn-action"><i class="fas fa-shopping-cart"></i></a>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="product-info">
-                                            <h3 class="product-title"><%# Eval("ProductName") %></h3>
+                                            <h3 class="product-title">
+                                                <a href='<%# ResolveUrl("~/View/ProductDetails.aspx?productId=" + Eval("ProductID")) %>'><%# Eval("ProductName") %></a>
+                                            </h3>
                                             <div class="product-meta">
                                                 <span class="price"><%# String.Format("{0:N0}", Eval("UnitPrice")) %></span>
                                                 <span class="unit"><%# Eval("QuantityPerUnit") %></span>
@@ -79,7 +83,7 @@
                         <div class="col-6 col-md-4 col-lg-3">
                             <div class="product-card h-100">
                                 <div class="product-image">
-                                    <a href="#" class="product-link">
+                                    <a href='<%# ResolveUrl("~/View/ProductDetails.aspx?productId=" + Eval("ProductID")) %>' class="product-link">
                                         <div class="image-container">
                                             <img src='<%# GetFirstProductImage(Container.DataItem) %>' 
                                                  alt='<%# Eval("ProductName") %>'
@@ -97,14 +101,16 @@
                                         <button class="btn-wishlist" title="Thêm vào yêu thích">
                                             <i class="far fa-heart"></i>
                                         </button>
-                                        <button class="btn-quickview" title="Xem nhanh">
+                                        <a href='<%# ResolveUrl("~/View/ProductDetails.aspx?productId=" + Eval("ProductID")) %>' 
+                                           class="btn-quickview" 
+                                           title="Xem nhanh">
                                             <i class="far fa-eye"></i>
-                                        </button>
+                                        </a>
                                     </div>
                                 </div>
                                 <div class="product-info">
                                     <h3 class="product-title">
-                                        <a href="#"><%# Eval("ProductName") %></a>
+                                        <a href='<%# ResolveUrl("~/View/ProductDetails.aspx?productId=" + Eval("ProductID")) %>'><%# Eval("ProductName") %></a>
                                     </h3>
                                     <div class="product-meta">
                                         <span class="unit"><%# Eval("QuantityPerUnit") %></span>
@@ -463,12 +469,14 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-decoration: none;
         }
 
         .btn-wishlist:hover,
         .btn-quickview:hover {
             background: #333;
             color: #fff;
+            text-decoration: none;
         }
 
         .product-info {
@@ -546,9 +554,10 @@
     <script>
         let currentPosition = 0;
         const sliderTrack = document.querySelector('.slider-track');
-        const cards = document.querySelectorAll('.product-card');
+        const cards = document.querySelectorAll('.featured-slider .product-card');
         let cardWidth = 216; // Initial card width + gap
         let maxPosition = 0;
+        const maxVisibleProducts = 10; // Maximum number of products to show
 
         function updateSliderDimensions() {
             const container = document.querySelector('.slider-container');
@@ -561,8 +570,8 @@
                 cardWidth = 216; // Original size on desktop (200px + 16px gap)
             }
 
-            // Calculate total content width
-            const totalContentWidth = cards.length * cardWidth;
+            // Calculate total content width for exactly 10 products
+            const totalContentWidth = Math.min(cards.length, maxVisibleProducts) * cardWidth;
             
             // Calculate new maxPosition
             maxPosition = -(totalContentWidth - containerWidth);
@@ -578,8 +587,20 @@
             // Apply the new position
             sliderTrack.style.transform = `translateX(${currentPosition}px)`;
             
-            // Update slider track width
+            // Update slider track width to fit exactly 10 products
             sliderTrack.style.width = `${totalContentWidth}px`;
+
+            // Hide navigation buttons if not needed
+            const prevButton = document.querySelector('.nav-btn.prev');
+            const nextButton = document.querySelector('.nav-btn.next');
+            
+            if (containerWidth >= totalContentWidth) {
+                prevButton.style.display = 'none';
+                nextButton.style.display = 'none';
+            } else {
+                prevButton.style.display = 'flex';
+                nextButton.style.display = 'flex';
+            }
         }
 
         function moveSlider(direction) {
@@ -588,13 +609,20 @@
             const cardsToMove = Math.floor(containerWidth / cardWidth);
             const moveAmount = cardsToMove * cardWidth;
 
-            if (direction === 'right') {
+            if (direction === 'right' && currentPosition > maxPosition) {
                 currentPosition = Math.max(maxPosition, currentPosition - moveAmount);
-            } else {
+            } else if (direction === 'left' && currentPosition < 0) {
                 currentPosition = Math.min(0, currentPosition + moveAmount);
             }
 
             sliderTrack.style.transform = `translateX(${currentPosition}px)`;
+
+            // Update navigation buttons visibility
+            const prevButton = document.querySelector('.nav-btn.prev');
+            const nextButton = document.querySelector('.nav-btn.next');
+            
+            prevButton.style.opacity = currentPosition < 0 ? '1' : '0.5';
+            nextButton.style.opacity = currentPosition > maxPosition ? '1' : '0.5';
         }
 
         // Initialize slider dimensions
@@ -638,10 +666,19 @@
             startX = null;
             sliderTrack.style.transition = 'transform 0.5s ease';
             
-            // Snap to nearest card position
+            // Snap to nearest card position within bounds
             const cardPosition = Math.round(currentPosition / cardWidth) * cardWidth;
             currentPosition = Math.min(0, Math.max(maxPosition, cardPosition));
             sliderTrack.style.transform = `translateX(${currentPosition}px)`;
+        });
+
+        // Initialize button states
+        document.addEventListener('DOMContentLoaded', () => {
+            const prevButton = document.querySelector('.nav-btn.prev');
+            const nextButton = document.querySelector('.nav-btn.next');
+            
+            prevButton.style.opacity = '0.5';
+            nextButton.style.opacity = currentPosition > maxPosition ? '1' : '0.5';
         });
     </script>
 </asp:Content>
