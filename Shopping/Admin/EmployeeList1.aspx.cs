@@ -8,7 +8,7 @@ namespace Shopping.Admin
 {
     public partial class EmployeeList : Page
     {
-        private readonly EmployeeController employeeController = new EmployeeController();
+        private readonly EmployeeController1 employeeController = new EmployeeController1();
 
         protected void Page_Load(object sender, EventArgs e)
         {

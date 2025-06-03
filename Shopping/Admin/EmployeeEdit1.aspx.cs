@@ -7,7 +7,7 @@ namespace Shopping.Admin
 {
     public partial class EmployeeEdit : Page
     {
-        private readonly EmployeeController employeeController = new EmployeeController();
+        private readonly EmployeeController1 employeeController = new EmployeeController1();
         private int? employeeId = null;
         protected bool IsNewEmployee = true;
         private Employee currentEmployee = null;
