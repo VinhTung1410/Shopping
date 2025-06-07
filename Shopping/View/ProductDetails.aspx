@@ -48,7 +48,7 @@
                     <span class="ms-3 text-muted">Còn <asp:Label ID="lblUnitsInStock" runat="server" /> sản phẩm</span>
                 </div>
                 <div class="d-flex gap-2 mb-3">
-                    <asp:Button ID="btnBuyNow" runat="server" Text="Mua ngay" CssClass="btn btn-warning fw-bold px-4" />
+                    <asp:Button ID="btnBuyNow" runat="server" Text="Mua ngay" CssClass="btn btn-warning fw-bold px-4" OnClick="btnBuyNow_Click"/>
                     <asp:Button ID="btnAddToCart" runat="server" Text="Thêm vào giỏ hàng" OnClick="btnAddToCart_Click" CssClass="btn btn-danger fw-bold px-4" />
                 </div>
                 <div class="mb-3">

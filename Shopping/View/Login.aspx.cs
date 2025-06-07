@@ -32,10 +32,16 @@ namespace Shopping.View
                         User user = userController.GetUserByUsername(username);
                         if (user != null)
                         {
+                            if (!user.IsActive)
+                            {
+                                Response.Redirect("~/View/SuspensePage.aspx");
+                                return;
+                            }
                             // Store user information in session
                             Session["Username"] = username;
                             Session["UserID"] = user.UserID;
                             Session["RoleID"] = user.RoleID;
+                            Session["EmployeeID"] = user.EmployeeID;
 
                             // Redirect based on role
                             if (user.RoleID == 1) // Admin role

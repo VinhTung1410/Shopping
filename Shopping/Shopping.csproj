@@ -229,6 +229,8 @@
     <Content Include="View\Login.aspx" />
     <Content Include="View\ProductDetails.aspx" />
     <Content Include="View\Register.aspx" />
+    <Content Include="View\CartView.aspx" />
+    <Content Include="View\SuspensePage.aspx" />
     <Content Include="Web.config" />
     <Content Include="Bundle.config" />
     <Content Include="Site.Mobile.Master" />
@@ -285,6 +287,7 @@
     <Compile Include="Contact.aspx.designer.cs">
       <DependentUpon>Contact.aspx</DependentUpon>
     </Compile>
+    <Compile Include="Controller1\CartController.cs" />
     <Compile Include="Controller1\EmployeeController1.cs" />
     <Compile Include="Controller1\ImageHelper.cs" />
     <Compile Include="Controller1\ProductController.cs" />
@@ -302,6 +305,7 @@
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
     <Compile Include="Model1\Employee.cs" />
+    <Compile Include="Model1\OrderDetails.cs" />
     <Compile Include="Model1\Product.cs" />
     <Compile Include="Model1\User.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -346,6 +350,20 @@
     </Compile>
     <Compile Include="View\Register.aspx.designer.cs">
       <DependentUpon>Register.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\CartView.aspx.cs">
+      <DependentUpon>CartView.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\CartView.aspx.designer.cs">
+      <DependentUpon>CartView.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\SuspensePage.aspx.cs">
+      <DependentUpon>SuspensePage.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\SuspensePage.aspx.designer.cs">
+      <DependentUpon>SuspensePage.aspx</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

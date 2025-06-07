@@ -7,66 +7,65 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Shopping
+namespace Shopping.View
 {
 
 
-    public partial class SiteMaster
+    public partial class WebForm1
     {
 
         /// <summary>
-        /// HeaderStyles control.
+        /// litItemCount control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.ContentPlaceHolder HeaderStyles;
+        protected global::System.Web.UI.WebControls.Literal litItemCount;
 
         /// <summary>
-        /// NavContent control.
+        /// rptShoppingCart control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.ContentPlaceHolder NavContent;
+        protected global::System.Web.UI.WebControls.Repeater rptShoppingCart;
 
         /// <summary>
-        /// cartPanel control.
+        /// litSummaryItemCount control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl cartPanel;
+        protected global::System.Web.UI.WebControls.Literal litSummaryItemCount;
 
         /// <summary>
-        /// lblCartItemCount control.
+        /// litSummaryTotalPrice control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label lblCartItemCount;
+        protected global::System.Web.UI.WebControls.Literal litSummaryTotalPrice;
 
         /// <summary>
-        /// MainContent control.
+        /// txtCouponCode control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.ContentPlaceHolder MainContent;
+        protected global::System.Web.UI.HtmlControls.HtmlInputText txtCouponCode;
 
         /// <summary>
-        /// Scripts control.
+        /// litTotalAmount control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.ContentPlaceHolder Scripts;
-        protected global::System.Web.UI.UpdatePanel updCartCount;
+        protected global::System.Web.UI.WebControls.Literal litTotalAmount;
     }
 }
