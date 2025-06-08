@@ -190,8 +190,8 @@
                                 ControlToValidate="txtUnitsInStock"
                                 Type="Integer"
                                 Operator="GreaterThan"
-                                ValueToCompare="0"
-                                ErrorMessage="Giá trị phải lớn hơn 0"
+                                ValueToCompare="-1"
+                                ErrorMessage="Giá trị phải lớn hơn -1"
                                 Display="Dynamic"
                                 CssClass="text-danger" />
                         </div>

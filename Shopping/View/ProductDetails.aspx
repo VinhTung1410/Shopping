@@ -47,6 +47,7 @@
                     <span id="qtyError" class="ms-3 text-danger"></span>
                     <span class="ms-3 text-muted">Còn <asp:Label ID="lblUnitsInStock" runat="server" /> sản phẩm</span>
                 </div>
+                <div id="outOfStockMessage" class="mb-3 text-danger fw-bold" style="display:none;">Tạm thời hết hàng</div>
                 <div class="d-flex gap-2 mb-3">
                     <asp:Button ID="btnBuyNow" runat="server" Text="Mua ngay" CssClass="btn btn-warning fw-bold px-4" OnClick="btnBuyNow_Click"/>
                     <asp:Button ID="btnAddToCart" runat="server" Text="Thêm vào giỏ hàng" OnClick="btnAddToCart_Click" CssClass="btn btn-danger fw-bold px-4" />
@@ -91,6 +92,7 @@
                 qtyInput.value = qty - 1;
                 document.getElementById('qtyError').innerText = '';
             }
+            updateButtonStates(); // Call this to re-evaluate button states
             console.log('After decrease - Quantity:', qtyInput.value);
         }
 
@@ -108,7 +110,47 @@
                 qtyInput.value = maxStock; // Đảm bảo không vượt quá maxStock
                 document.getElementById('qtyError').innerText = 'Số lượng vượt quá tồn kho!';
             }
+            updateButtonStates(); // Call this to re-evaluate button states
             console.log('After increase - Quantity:', qtyInput.value, 'Error:', document.getElementById('qtyError').innerText);
+        }
+
+        function updateButtonStates() {
+            var maxStock = getUnitInStock();
+            var btnBuyNow = document.getElementById('<%= btnBuyNow.ClientID %>');
+            var btnAddToCart = document.getElementById('<%= btnAddToCart.ClientID %>');
+            var outOfStockMessage = document.getElementById('outOfStockMessage');
+            var qtyInput = document.getElementById('<%= txtQuantity.ClientID %>');
+            var decreaseButton = qtyInput.previousElementSibling;
+            var increaseButton = qtyInput.nextElementSibling;
+
+
+            if (maxStock === 0) {
+                btnBuyNow.disabled = true;
+                btnAddToCart.disabled = true;
+                btnBuyNow.classList.add('btn-secondary');
+                btnBuyNow.classList.remove('btn-warning');
+                btnAddToCart.classList.add('btn-secondary');
+                btnAddToCart.classList.remove('btn-danger');
+                outOfStockMessage.style.display = 'block';
+                qtyInput.disabled = true;
+                decreaseButton.disabled = true;
+                increaseButton.disabled = true;
+                qtyInput.value = 0; // Set quantity to 0 if out of stock
+            } else {
+                btnBuyNow.disabled = false;
+                btnAddToCart.disabled = false;
+                btnBuyNow.classList.remove('btn-secondary');
+                btnBuyNow.classList.add('btn-warning');
+                btnAddToCart.classList.remove('btn-secondary');
+                btnAddToCart.classList.add('btn-danger');
+                outOfStockMessage.style.display = 'none';
+                qtyInput.disabled = false;
+                decreaseButton.disabled = false;
+                increaseButton.disabled = false;
+                if (parseInt(qtyInput.value) === 0) {
+                    qtyInput.value = 1; // Reset quantity to 1 if it was 0 and now in stock
+                }
+            }
         }
 
         document.addEventListener('DOMContentLoaded', function () {
@@ -128,8 +170,10 @@
                 if (qty < 1) {
                     qtyInput.value = 1;
                 }
+                updateButtonStates(); // Call this to re-evaluate button states
                 console.log('Input event - Final Qty:', qtyInput.value, 'Error:', document.getElementById('qtyError').innerText);
             });
+            updateButtonStates(); // Initial call to set button states on page load
         });
     </script>
 </asp:Content>
