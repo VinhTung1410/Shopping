@@ -157,12 +157,26 @@
                                         <h5 class="text-uppercase mb-3 text-black">Shipping</h5>
 
                                         <div class="mb-4 pb-2">
-                                            <select class="form-select">
-                                                <option value="1">Standard-Delivery- €5.00</option>
-                                                <option value="2">Two</option>
-                                                <option value="3">Three</option>
-                                                <option value="4">Four</option>
+                                            <select class="form-select" id="shippingSelect" onchange="updateTotalPrice()">
+                                                <option value="0">Select shipping method</option>
+                                                <option value="5">Standard-Delivery- €5.00</option>
+                                                <option value="10">Express shipping- €10.00</option>             
                                             </select>
+                                            <span id="shippingError" class="text-danger" style="display:none;">Please select a shipping method</span>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between mb-5">
+                                            <h5 class="text-uppercase text-black">Total price</h5>
+                                            <h5 class="price-text">
+                                                <asp:Label ID="lblTotalAmount" runat="server" Text=""></asp:Label>
+                                            </h5>
+                                        </div>
+
+                                        <div class="d-flex justify-content-between mb-5">
+                                            <h5 class="text-uppercase text-black">Final Total</h5>
+                                            <h5 class="price-text">
+                                                <asp:Label ID="lblFinalTotal" runat="server" Text=""></asp:Label>
+                                            </h5>
                                         </div>
 
                                         <h5 class="text-uppercase mb-3 text-black">Give code</h5>
@@ -176,12 +190,7 @@
 
                                         <hr class="my-4">
 
-                                        <div class="d-flex justify-content-between mb-5">
-                                            <h5 class="text-uppercase text-black">Total price</h5>
-                                            <h5 class="price-text"><asp:Literal ID="litTotalAmount" runat="server"></asp:Literal></h5>
-                                        </div>
-
-                                        <button type="button" class="btn btn-dark btn-block btn-lg">Confirm</button>
+                                        <asp:Button ID="btnConfirm" runat="server" Text="Confirm" CssClass="btn btn-dark btn-block btn-lg" OnClientClick="return validateShipping()" OnClick="btnConfirm_Click" />
 
                                     </div>
                                 </div>
@@ -193,10 +202,37 @@
         </div>
     </section>
     <script type="text/javascript">
-        // Function to get the error span for a specific product
-        function getQtyErrorSpan(productId) {
-            return document.getElementById('qtyError_' + productId);
+        function updateTotalPrice() {
+            var shippingSelect = document.getElementById('shippingSelect');
+            var totalAmount = document.getElementById('<%= lblTotalAmount.ClientID %>');
+            var finalTotal = document.getElementById('<%= lblFinalTotal.ClientID %>');
+
+            if (!shippingSelect || !totalAmount || !finalTotal) return;
+
+            var shippingCost = parseFloat(shippingSelect.value);
+            var basePrice = parseFloat(totalAmount.innerText.replace(/[^0-9.-]+/g, ''));
+            var newTotal = basePrice + shippingCost;
+            
+            finalTotal.innerText = newTotal.toFixed(0) + '€';
         }
+
+        function validateShipping() {
+            var shippingSelect = document.getElementById('shippingSelect');
+            var shippingError = document.getElementById('shippingError');
+            
+            if (shippingSelect.value === "0") {
+                shippingError.style.display = "block";
+                return false;
+            }
+            
+            shippingError.style.display = "none";
+            return true;
+        }
+
+        $(document).ready(function() {
+            console.log('Document ready, calling updateTotalPrice');
+            updateTotalPrice();
+        });
 
         // Main function to handle quantity changes (both increase and decrease)
         function handleQuantityChange(button, commandName) {

@@ -24,33 +24,6 @@ namespace Shopping.Admin
         protected global::System.Web.UI.WebControls.Panel pnlAddEdit;
 
         /// <summary>
-        /// txtProductID control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtProductID;
-
-        /// <summary>
-        /// rfvProductID control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvProductID;
-
-        /// <summary>
-        /// hdnIsEdit control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.HiddenField hdnIsEdit;
-
-        /// <summary>
         /// txtProductName control.
         /// </summary>
         /// <remarks>
@@ -67,33 +40,6 @@ namespace Shopping.Admin
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvProductName;
-
-        /// <summary>
-        /// txtQuantityPerUnit control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtQuantityPerUnit;
-
-        /// <summary>
-        /// rfvQuantityPerUnit control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvQuantityPerUnit;
-
-        /// <summary>
-        /// cvQuantityPerUnit control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.CompareValidator cvQuantityPerUnit;
 
         /// <summary>
         /// txtUnitPrice control.
@@ -148,33 +94,6 @@ namespace Shopping.Admin
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.CompareValidator cvUnitsInStock;
-
-        /// <summary>
-        /// txtUnitsOnOrder control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.TextBox txtUnitsOnOrder;
-
-        /// <summary>
-        /// rfvUnitsOnOrder control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.RequiredFieldValidator rfvUnitsOnOrder;
-
-        /// <summary>
-        /// cvUnitsOnOrder control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.CompareValidator cvUnitsOnOrder;
 
         /// <summary>
         /// txtDescription control.

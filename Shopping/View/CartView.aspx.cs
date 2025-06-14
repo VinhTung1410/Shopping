@@ -18,7 +18,7 @@ namespace Shopping.View
             }
         }
 
-        private void LoadCartItems()
+        private void LoadCartItems(List<CartItem> cartItems = null)
         {
             if (Session["EmployeeID"] == null)
             {
@@ -36,7 +36,12 @@ namespace Shopping.View
 
             int employeeId = Convert.ToInt32(Session["EmployeeID"]); 
             CartController cartController = new CartController();
-            List<CartItem> cartItems = cartController.GetCartItems(employeeId);
+            
+            // If cartItems is not provided, get them from the controller
+            if (cartItems == null)
+            {
+                cartItems = cartController.GetCartItems(employeeId);
+            }
 
             rptShoppingCart.DataSource = cartItems;
             rptShoppingCart.DataBind();
@@ -50,10 +55,14 @@ namespace Shopping.View
                 totalItems += item.Quantity;
             }
 
+            // Store base price in Session for shipping calculations
+            Session["BasePrice"] = totalPrice;
+
             litItemCount.Text = totalItems.ToString();
             litSummaryItemCount.Text = totalItems.ToString();
-            litSummaryTotalPrice.Text = totalPrice.ToString("N0") + "$"; // Format as currency
-            litTotalAmount.Text = totalPrice.ToString("N0") + "$"; // Format as currency
+            litSummaryTotalPrice.Text = totalPrice.ToString("N0") + "€";
+            lblTotalAmount.Text = totalPrice.ToString("N0") + "€";
+            lblFinalTotal.Text = totalPrice.ToString("N0") + "€";
 
             // Update the cart count on the master page
             SiteMaster masterPage = this.Master as SiteMaster;
@@ -112,8 +121,6 @@ namespace Shopping.View
                             if (newQuantity > maxStock)
                             {
                                 newQuantity = maxStock; // Limit to available stock
-                                // Optionally, you could display a message to the user here.
-                                // For server-side, this usually means reloading the cart with the adjusted quantity
                             }
                         }
                         else if (e.CommandName == "Decrease")
@@ -133,7 +140,6 @@ namespace Shopping.View
                 }
                 else
                 {
-                    // Log or handle the case where txtQuantity is not found
                     System.Diagnostics.Debug.WriteLine($"Error: txtQuantity control not found for ProductID: {productId}");
                 }
             }
@@ -150,6 +156,67 @@ namespace Shopping.View
             if (masterPage != null)
             {
                 masterPage.UpdateCartCount();
+            }
+        }
+
+        // Add method to handle shipping cost updates
+        [System.Web.Services.WebMethod]
+        public static string UpdateTotalWithShipping(decimal shippingCost)
+        {
+            try
+            {
+                // Get the base price from the session
+                decimal basePrice = 0;
+                if (HttpContext.Current.Session["BasePrice"] != null)
+                {
+                    basePrice = Convert.ToDecimal(HttpContext.Current.Session["BasePrice"]);
+                }
+
+                // Calculate new total
+                decimal newTotal = basePrice + shippingCost;
+
+                // Store the new total in session
+                HttpContext.Current.Session["FinalTotal"] = newTotal;
+
+                // Return formatted total
+                return newTotal.ToString("N0") + "€";
+            }
+            catch (Exception ex)
+            {
+                return "Error: " + ex.Message;
+            }
+        }
+
+        protected void Page_PreRender(object sender, EventArgs e)
+        {
+            if (Session["Cart"] != null)
+            {
+                List<CartItem> cartItems = (List<CartItem>)Session["Cart"];
+                LoadCartItems(cartItems);
+            }
+        }
+
+        protected void btnConfirm_Click(object sender, EventArgs e)
+        {
+            if (Session["Cart"] != null)
+            {
+                List<CartItem> cartItems = (List<CartItem>)Session["Cart"];
+                if (cartItems.Count > 0)
+                {
+                    // Get selected shipping cost
+                    string shippingSelect = Request.Form["shippingSelect"];
+                    if (string.IsNullOrEmpty(shippingSelect) || shippingSelect == "0")
+                    {
+                        // Should not happen due to client-side validation, but adding server-side check
+                        return;
+                    }
+
+                    // Store shipping cost in session for later use
+                    Session["ShippingCost"] = decimal.Parse(shippingSelect);
+
+                    // Redirect to checkout page
+                    Response.Redirect("~/View/Checkout.aspx");
+                }
             }
         }
     }

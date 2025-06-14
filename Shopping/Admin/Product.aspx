@@ -125,16 +125,11 @@
             <div class="row pb-3">
                 <div class="col-6">
                     <asp:Panel ID="pnlAddEdit" runat="server" CssClass="mb-3" Visible="false">
-                        <div class="mb-3">
-                            <label for="txtProductID" class="form-label required">Product ID</label>
-                            <asp:TextBox ID="txtProductID" runat="server" CssClass="form-control" />
-                            <asp:RequiredFieldValidator ID="rfvProductID" runat="server" 
-                                ControlToValidate="txtProductID" 
-                                ErrorMessage="This zone is mandatory to fill out" 
-                                Display="Dynamic" 
-                                CssClass="text-danger" />
+                        <%--<div class="mb-3">
+                            <label for="txtProductID" class="form-label">Product ID</label>
+                            <asp:TextBox ID="txtProductID" runat="server" CssClass="form-control" ReadOnly="true" />
                             <asp:HiddenField ID="hdnIsEdit" runat="server" Value="false" />
-                        </div>
+                        </div>--%>
                         <div class="mb-3">
                             <label for="txtProductName" class="form-label required">Product Name</label>
                             <asp:TextBox ID="txtProductName" runat="server" CssClass="form-control" />
@@ -142,23 +137,6 @@
                                 ControlToValidate="txtProductName" 
                                 ErrorMessage="This zone is mandatory to fill out" 
                                 Display="Dynamic" 
-                                CssClass="text-danger" />
-                        </div>
-                        <div class="mb-3">
-                            <label for="txtQuantityPerUnit" class="form-label required">Quantity Per Unit</label>
-                            <asp:TextBox ID="txtQuantityPerUnit" runat="server" CssClass="form-control" TextMode="Number" />
-                            <asp:RequiredFieldValidator ID="rfvQuantityPerUnit" runat="server" 
-                                ControlToValidate="txtQuantityPerUnit" 
-                                ErrorMessage="This zone is mandatory to fill out" 
-                                Display="Dynamic" 
-                                CssClass="text-danger" />
-                            <asp:CompareValidator ID="cvQuantityPerUnit" runat="server"
-                                ControlToValidate="txtQuantityPerUnit"
-                                Type="Integer"
-                                Operator="GreaterThan"
-                                ValueToCompare="0"
-                                ErrorMessage="The value must be greater than 0"
-                                Display="Dynamic"
                                 CssClass="text-danger" />
                         </div>
                         <div class="mb-3">
@@ -192,23 +170,6 @@
                                 Operator="GreaterThan"
                                 ValueToCompare="-1"
                                 ErrorMessage="The value must be positive"
-                                Display="Dynamic"
-                                CssClass="text-danger" />
-                        </div>
-                        <div class="mb-3">
-                            <label for="txtUnitsOnOrder" class="form-label required">Units On Order</label>
-                            <asp:TextBox ID="txtUnitsOnOrder" runat="server" CssClass="form-control" TextMode="Number" />
-                            <asp:RequiredFieldValidator ID="rfvUnitsOnOrder" runat="server" 
-                                ControlToValidate="txtUnitsOnOrder" 
-                                ErrorMessage="This zone is mandatory to fill out" 
-                                Display="Dynamic" 
-                                CssClass="text-danger" />
-                            <asp:CompareValidator ID="cvUnitsOnOrder" runat="server"
-                                ControlToValidate="txtUnitsOnOrder"
-                                Type="Integer"
-                                Operator="GreaterThan"
-                                ValueToCompare="0"
-                                ErrorMessage="The value must be greater than 0"
                                 Display="Dynamic"
                                 CssClass="text-danger" />
                         </div>
@@ -263,10 +224,8 @@
                 <Columns>
                     <asp:BoundField DataField="ProductID" HeaderText="Product ID" />
                     <asp:BoundField DataField="ProductName" HeaderText="Product Name" />
-                    <asp:BoundField DataField="QuantityPerUnit" HeaderText="Quantity Per Unit" />
                     <asp:BoundField DataField="UnitPrice" HeaderText="Unit Price" DataFormatString="{0:C2}" />
                     <asp:BoundField DataField="UnitsInStock" HeaderText="Units In Stock" />
-                    <asp:BoundField DataField="UnitsOnOrder" HeaderText="Units On Order" />
                     <asp:TemplateField HeaderText="Images">
                         <ItemTemplate>
                             <div class="grid-image-container position-relative">
@@ -349,12 +308,10 @@
                 }
             }
 
-            $("#<%= txtProductID.ClientID %>").on("input", function() { updateAsterisk(this); });
+            <%--$("#<%= txtProductID.ClientID %>").on("input", function() { updateAsterisk(this); });--%>
             $("#<%= txtProductName.ClientID %>").on("input", function() { updateAsterisk(this); });
-            $("#<%= txtQuantityPerUnit.ClientID %>").on("input", function() { updateAsterisk(this); });
             $("#<%= txtUnitPrice.ClientID %>").on("input", function() { updateAsterisk(this); });
             $("#<%= txtUnitsInStock.ClientID %>").on("input", function() { updateAsterisk(this); });
-            $("#<%= txtUnitsOnOrder.ClientID %>").on("input", function() { updateAsterisk(this); });
 
             $("input[type='text'], input[type='number']").each(function() {
                 updateAsterisk(this);

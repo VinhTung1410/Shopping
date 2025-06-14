@@ -52,7 +52,7 @@ namespace Shopping.Admin
         {
             ClearForm();
             pnlAddEdit.Visible = true;
-            txtProductID.Enabled = true;
+            //txtProductID.Enabled = true;
             ViewState["IsEdit"] = false;
             ViewState["EditProductID"] = null;
             rptProductImages.DataSource = null;
@@ -66,17 +66,15 @@ namespace Shopping.Admin
                 if (Page.IsValid)
                 {
                     bool isEdit = (bool)ViewState["IsEdit"];
-                    int productId = isEdit ? (int)ViewState["EditProductID"] : Convert.ToInt32(txtProductID.Text);
+                    int? productId = isEdit ? (int?)ViewState["EditProductID"] : null;
 
                     var product = new Model1.Product
                     {
-                        ProductID = productId,
+                        ProductID = productId ?? 0,
                         ProductName = txtProductName.Text.Trim(),
                         Description = txtDescription.Text.Trim(),
-                        QuantityPerUnit = txtQuantityPerUnit.Text.Trim(),
                         UnitPrice = decimal.Parse(txtUnitPrice.Text),
-                        UnitsInStock = int.Parse(txtUnitsInStock.Text),
-                        UnitsOnOrder = int.Parse(txtUnitsOnOrder.Text)
+                        UnitsInStock = int.Parse(txtUnitsInStock.Text)
                     };
 
                     bool success;
@@ -85,8 +83,8 @@ namespace Shopping.Admin
                         success = productController.UpdateProduct(product);
                         if (success)
                         {
-                            HandleImageUploads(productId);
-                            ShowMessage(true, "Sản phẩm đã được cập nhật!", null);
+                            HandleImageUploads(product.ProductID);
+                            ShowMessage(true, "Product has been updated!", null);
                         }
                         else
                         {
@@ -98,8 +96,14 @@ namespace Shopping.Admin
                         success = productController.AddProduct(product);
                         if (success)
                         {
-                            HandleImageUploads(productId);
-                            ShowMessage(true, "Sản phẩm đã được thêm vào!", null);
+                            // Get the new product ID after insert
+                            var newProduct = productController.GetAllProducts()
+                                .FirstOrDefault(p => p.ProductName == product.ProductName);
+                            if (newProduct != null)
+                            {
+                                HandleImageUploads(newProduct.ProductID);
+                            }
+                            ShowMessage(true, "Product has been added!", null);
                         }
                         else
                         {
@@ -194,14 +198,14 @@ namespace Shopping.Admin
                             ViewState["IsEdit"] = true;
                             ViewState["EditProductID"] = productId;
                             pnlAddEdit.Visible = true;
-                            txtProductID.Text = product.ProductID.ToString();
-                            txtProductID.Enabled = false;
+                            //txtProductID.Text = product.ProductID.ToString();
+                            //txtProductID.Enabled = false;
                             txtProductName.Text = product.ProductName;
                             txtDescription.Text = product.Description;
-                            txtQuantityPerUnit.Text = product.QuantityPerUnit;
+                            //txtQuantityPerUnit.Text = product.QuantityPerUnit;
                             txtUnitPrice.Text = product.UnitPrice?.ToString();
                             txtUnitsInStock.Text = product.UnitsInStock?.ToString();
-                            txtUnitsOnOrder.Text = product.UnitsOnOrder?.ToString();
+                            //txtUnitsOnOrder.Text = product.UnitsOnOrder?.ToString();
 
                             // Bind product images
                             if (product.ProductImages != null)
@@ -214,7 +218,7 @@ namespace Shopping.Admin
 
                     case "DeleteProduct":
                         bool success = productController.DeleteProduct(productId);
-                        ShowMessage(success, "Sản phẩm này đã được xóa!", "Error deleting product.");
+                        ShowMessage(success, "Product has been deleted!", "Error deleting product.");
                         if (success)
                         {
                             BindGrid();
@@ -243,7 +247,7 @@ namespace Shopping.Admin
                         var product = productController.GetProductById(productId);
                         rptProductImages.DataSource = product.ProductImages;
                         rptProductImages.DataBind();
-                        ShowMessage(true, "Hình ảnh đã được xóa!", null);
+                        ShowMessage(true, "Image has been removed!", null);
                     }
                     else
                     {
@@ -259,13 +263,11 @@ namespace Shopping.Admin
 
         private void ClearForm()
         {
-            txtProductID.Text = string.Empty;
+            //txtProductID.Text = string.Empty;
             txtProductName.Text = string.Empty;
             txtDescription.Text = string.Empty;
-            txtQuantityPerUnit.Text = string.Empty;
             txtUnitPrice.Text = string.Empty;
             txtUnitsInStock.Text = string.Empty;
-            txtUnitsOnOrder.Text = string.Empty;
             lblImageError.Visible = false;
             rptProductImages.DataSource = null;
             rptProductImages.DataBind();

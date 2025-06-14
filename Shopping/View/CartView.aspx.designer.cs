@@ -15,6 +15,15 @@ namespace Shopping.View
     {
 
         /// <summary>
+        /// cartUpdatePanel control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.UpdatePanel cartUpdatePanel;
+
+        /// <summary>
         /// litItemCount control.
         /// </summary>
         /// <remarks>
@@ -31,6 +40,15 @@ namespace Shopping.View
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Repeater rptShoppingCart;
+
+        /// <summary>
+        /// hlBackToShop control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HyperLink hlBackToShop;
 
         /// <summary>
         /// litSummaryItemCount control.
@@ -67,5 +85,23 @@ namespace Shopping.View
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.Literal litTotalAmount;
+
+        /// <summary>
+        /// lblTotalAmount control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblTotalAmount;
+
+        /// <summary>
+        /// lblFinalTotal control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Label lblFinalTotal;
     }
 }
