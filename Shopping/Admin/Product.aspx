@@ -130,7 +130,7 @@
                             <asp:TextBox ID="txtProductID" runat="server" CssClass="form-control" />
                             <asp:RequiredFieldValidator ID="rfvProductID" runat="server" 
                                 ControlToValidate="txtProductID" 
-                                ErrorMessage="Zone này bắt buộc phải điền" 
+                                ErrorMessage="This zone is mandatory to fill out" 
                                 Display="Dynamic" 
                                 CssClass="text-danger" />
                             <asp:HiddenField ID="hdnIsEdit" runat="server" Value="false" />
@@ -140,7 +140,7 @@
                             <asp:TextBox ID="txtProductName" runat="server" CssClass="form-control" />
                             <asp:RequiredFieldValidator ID="rfvProductName" runat="server" 
                                 ControlToValidate="txtProductName" 
-                                ErrorMessage="Zone này bắt buộc phải điền" 
+                                ErrorMessage="This zone is mandatory to fill out" 
                                 Display="Dynamic" 
                                 CssClass="text-danger" />
                         </div>
@@ -149,7 +149,7 @@
                             <asp:TextBox ID="txtQuantityPerUnit" runat="server" CssClass="form-control" TextMode="Number" />
                             <asp:RequiredFieldValidator ID="rfvQuantityPerUnit" runat="server" 
                                 ControlToValidate="txtQuantityPerUnit" 
-                                ErrorMessage="Zone này bắt buộc phải điền" 
+                                ErrorMessage="This zone is mandatory to fill out" 
                                 Display="Dynamic" 
                                 CssClass="text-danger" />
                             <asp:CompareValidator ID="cvQuantityPerUnit" runat="server"
@@ -157,7 +157,7 @@
                                 Type="Integer"
                                 Operator="GreaterThan"
                                 ValueToCompare="0"
-                                ErrorMessage="Giá trị phải lớn hơn 0"
+                                ErrorMessage="The value must be greater than 0"
                                 Display="Dynamic"
                                 CssClass="text-danger" />
                         </div>
@@ -166,7 +166,7 @@
                             <asp:TextBox ID="txtUnitPrice" runat="server" CssClass="form-control" TextMode="Number" Step="0.01" />
                             <asp:RequiredFieldValidator ID="rfvUnitPrice" runat="server" 
                                 ControlToValidate="txtUnitPrice" 
-                                ErrorMessage="Zone này bắt buộc phải điền" 
+                                ErrorMessage="This zone is mandatory to fill out" 
                                 Display="Dynamic" 
                                 CssClass="text-danger" />
                             <asp:CompareValidator ID="cvUnitPrice" runat="server"
@@ -174,7 +174,7 @@
                                 Type="Double"
                                 Operator="GreaterThan"
                                 ValueToCompare="0"
-                                ErrorMessage="Giá trị phải lớn hơn 0"
+                                ErrorMessage="The value must be greater than 0"
                                 Display="Dynamic"
                                 CssClass="text-danger" />
                         </div>
@@ -183,7 +183,7 @@
                             <asp:TextBox ID="txtUnitsInStock" runat="server" CssClass="form-control" TextMode="Number" />
                             <asp:RequiredFieldValidator ID="rfvUnitsInStock" runat="server" 
                                 ControlToValidate="txtUnitsInStock" 
-                                ErrorMessage="Zone này bắt buộc phải điền" 
+                                ErrorMessage="This zone is mandatory to fill out" 
                                 Display="Dynamic" 
                                 CssClass="text-danger" />
                             <asp:CompareValidator ID="cvUnitsInStock" runat="server"
@@ -191,7 +191,7 @@
                                 Type="Integer"
                                 Operator="GreaterThan"
                                 ValueToCompare="-1"
-                                ErrorMessage="Giá trị phải lớn hơn -1"
+                                ErrorMessage="The value must be positive"
                                 Display="Dynamic"
                                 CssClass="text-danger" />
                         </div>
@@ -200,7 +200,7 @@
                             <asp:TextBox ID="txtUnitsOnOrder" runat="server" CssClass="form-control" TextMode="Number" />
                             <asp:RequiredFieldValidator ID="rfvUnitsOnOrder" runat="server" 
                                 ControlToValidate="txtUnitsOnOrder" 
-                                ErrorMessage="Zone này bắt buộc phải điền" 
+                                ErrorMessage="This zone is mandatory to fill out" 
                                 Display="Dynamic" 
                                 CssClass="text-danger" />
                             <asp:CompareValidator ID="cvUnitsOnOrder" runat="server"
@@ -208,7 +208,7 @@
                                 Type="Integer"
                                 Operator="GreaterThan"
                                 ValueToCompare="0"
-                                ErrorMessage="Giá trị phải lớn hơn 0"
+                                ErrorMessage="The value must be greater than 0"
                                 Display="Dynamic"
                                 CssClass="text-danger" />
                         </div>

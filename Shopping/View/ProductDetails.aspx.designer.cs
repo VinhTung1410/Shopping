@@ -69,15 +69,6 @@ namespace Shopping.View
         protected global::System.Web.UI.WebControls.Label lblDiscount;
 
         /// <summary>
-        /// btnDecrease control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnDecrease;
-
-        /// <summary>
         /// txtQuantity control.
         /// </summary>
         /// <remarks>
@@ -85,15 +76,6 @@ namespace Shopping.View
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.TextBox txtQuantity;
-
-        /// <summary>
-        /// btnIncrease control.
-        /// </summary>
-        /// <remarks>
-        /// Auto-generated field.
-        /// To modify move field declaration from designer file to code-behind file.
-        /// </remarks>
-        protected global::System.Web.UI.WebControls.Button btnIncrease;
 
         /// <summary>
         /// lblUnitsInStock control.
