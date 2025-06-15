@@ -91,7 +91,6 @@ namespace Shopping.Controller1
                 catch (Exception ex)
                 {
                     transaction?.Rollback();
-                    System.Diagnostics.Debug.WriteLine($"Error adding to cart: {ex.Message}");
                     throw; 
                 }
             }
@@ -201,7 +200,6 @@ namespace Shopping.Controller1
                 }
                 catch (Exception ex)
                 {
-                    System.Diagnostics.Debug.WriteLine($"Error getting cart items: {ex.Message}");
                     throw;
                 }
             }
@@ -249,7 +247,6 @@ namespace Shopping.Controller1
                 catch (Exception ex)
                 {
                     transaction?.Rollback();
-                    System.Diagnostics.Debug.WriteLine($"Error updating cart item quantity: {ex.Message}");
                     throw;
                 }
             }
@@ -269,7 +266,6 @@ namespace Shopping.Controller1
                 catch (Exception ex)
                 {
                     transaction?.Rollback();
-                    System.Diagnostics.Debug.WriteLine($"Error removing cart item: {ex.Message}");
                     throw;
                 }
             }
@@ -310,6 +306,130 @@ namespace Shopping.Controller1
                 }
             }
             return 0;
+        }
+
+        public void CompleteOrder(int employeeId)
+        {
+            using (OracleConnection conn = Connect.Instance.GetConnection())
+            {
+                OracleTransaction transaction = null;
+                try
+                {
+                    transaction = conn.BeginTransaction(IsolationLevel.ReadCommitted);
+
+                    // 1. Get the pending order ID
+                    int orderId = GetPendingOrderId(employeeId, conn, transaction);
+                    
+                    if (orderId == 0)
+                    {
+                        transaction.Rollback();
+                        return;
+                    }
+
+                    // 2. Get all order details for this order
+                    string getOrderDetailsQuery = @"
+                        SELECT od.PRODUCTID, od.QUANTITY, p.UNITSINSTOCK, p.UNITSONORDER
+                        FROM TUNG.ORDERDETAILS od
+                        JOIN TUNG.PRODUCTS p ON od.PRODUCTID = p.PRODUCTID
+                        WHERE od.ORDERID = :p_orderId";
+
+                    List<CartItem> orderItems = new List<CartItem>();
+                    using (OracleCommand cmd = new OracleCommand())
+                    {
+                        cmd.CommandText = getOrderDetailsQuery;
+                        cmd.Connection = conn;
+                        cmd.Transaction = transaction;
+                        cmd.Parameters.Add(":p_orderId", OracleDbType.Int32).Value = orderId;
+
+                        using (OracleDataReader reader = cmd.ExecuteReader())
+                        {
+                            while (reader.Read())
+                            {
+                                var productId = Convert.ToInt32(reader["PRODUCTID"]);
+                                var quantity = Convert.ToInt32(reader["QUANTITY"]);
+                                
+                                orderItems.Add(new CartItem
+                                {
+                                    ProductID = productId,
+                                    Quantity = quantity
+                                });
+                            }
+                        }
+                    }
+
+                    // 3. Update product inventory for each item
+                    foreach (var item in orderItems)
+                    {
+                        // First check if we have enough stock
+                        string checkStockQuery = @"
+                            SELECT UNITSINSTOCK 
+                            FROM TUNG.PRODUCTS 
+                            WHERE PRODUCTID = :p_productId";
+
+                        using (OracleCommand checkCmd = new OracleCommand())
+                        {
+                            checkCmd.CommandText = checkStockQuery;
+                            checkCmd.Connection = conn;
+                            checkCmd.Transaction = transaction;
+                            checkCmd.Parameters.Add(":p_productId", OracleDbType.Int32).Value = item.ProductID;
+                            
+                            object currentStock = checkCmd.ExecuteScalar();
+                            int unitsInStock = Convert.ToInt32(currentStock);
+
+                            if (unitsInStock < item.Quantity)
+                            {
+                                throw new Exception($"Insufficient stock for product ID {item.ProductID}. Current stock: {unitsInStock}, Required: {item.Quantity}");
+                            }
+                        }
+
+                        string updateProductQuery = @"
+                            UPDATE TUNG.PRODUCTS 
+                            SET UNITSINSTOCK = UNITSINSTOCK - :p_quantity,
+                                UNITSONORDER = NVL(UNITSONORDER, 0) + :p_quantity2
+                            WHERE PRODUCTID = :p_productId";
+
+                        using (OracleCommand cmd = new OracleCommand())
+                        {
+                            cmd.CommandText = updateProductQuery;
+                            cmd.Connection = conn;
+                            cmd.Transaction = transaction;
+                            cmd.Parameters.Add(":p_quantity", OracleDbType.Int32).Value = item.Quantity;
+                            cmd.Parameters.Add(":p_quantity2", OracleDbType.Int32).Value = item.Quantity;
+                            cmd.Parameters.Add(":p_productId", OracleDbType.Int32).Value = item.ProductID;
+                            
+                            int rowsAffected = cmd.ExecuteNonQuery();
+
+                            if (rowsAffected == 0)
+                            {
+                                throw new Exception($"Failed to update product ID {item.ProductID}");
+                            }
+                        }
+                    }
+
+                    // 4. Update order status (set SHIPPEDDATE to current date)
+                    string updateOrderQuery = @"
+                        UPDATE TUNG.ORDERS 
+                        SET SHIPPEDDATE = :p_shippedDate 
+                        WHERE ORDERID = :p_orderId";
+
+                    using (OracleCommand cmd = new OracleCommand())
+                    {
+                        cmd.CommandText = updateOrderQuery;
+                        cmd.Connection = conn;
+                        cmd.Transaction = transaction;
+                        cmd.Parameters.Add(":p_shippedDate", OracleDbType.Date).Value = DateTime.Now;
+                        cmd.Parameters.Add(":p_orderId", OracleDbType.Int32).Value = orderId;
+                        cmd.ExecuteNonQuery();
+                    }
+
+                    transaction.Commit();
+                }
+                catch (Exception ex)
+                {
+                    transaction?.Rollback();
+                    throw;
+                }
+            }
         }
     }
 

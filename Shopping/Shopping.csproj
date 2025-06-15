@@ -227,6 +227,7 @@
     <Content Include="Site.Master" />
     <Content Include="ViewSwitcher.ascx" />
     <Content Include="View\Login.aspx" />
+    <Content Include="View\OrderSuccess.aspx" />
     <Content Include="View\ProductDetails.aspx" />
     <Content Include="View\Register.aspx" />
     <Content Include="View\CartView.aspx" />
@@ -336,6 +337,13 @@
     </Compile>
     <Compile Include="View\Login.aspx.designer.cs">
       <DependentUpon>Login.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="View\OrderSuccess.aspx.cs">
+      <DependentUpon>OrderSuccess.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="View\OrderSuccess.aspx.designer.cs">
+      <DependentUpon>OrderSuccess.aspx</DependentUpon>
     </Compile>
     <Compile Include="View\ProductDetails.aspx.cs">
       <DependentUpon>ProductDetails.aspx</DependentUpon>
