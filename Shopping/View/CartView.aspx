@@ -156,14 +156,18 @@
 
                                         <h5 class="text-uppercase mb-3 text-black">Shipping</h5>
 
-                                        <div class="mb-4 pb-2">
-                                            <select class="form-select" id="shippingSelect" onchange="updateTotalPrice()">
-                                                <option value="0">Select shipping method</option>
-                                                <option value="5">Standard-Delivery- €5.00</option>
-                                                <option value="10">Express shipping- €10.00</option>             
-                                            </select>
-                                            <span id="shippingError" class="text-danger" style="display:none;">Please select a shipping method</span>
-                                        </div>
+                                        <asp:UpdatePanel ID="shippingUpdatePanel" runat="server" UpdateMode="Conditional">
+                                            <ContentTemplate>
+                                                <div class="mb-4 pb-2">
+                                                    <select class="form-select" id="shippingSelect" runat="server" onchange="updateTotalPrice()">
+                                                        <option value="0">Select shipping method</option>
+                                                        <option value="5">Standard-Delivery- €5.00</option>
+                                                        <option value="10">Express shipping- €10.00</option>             
+                                                    </select>
+                                                    <span id="shippingError" class="text-danger" style="display:none;">Please select a shipping method</span>
+                                                </div>
+                                            </ContentTemplate>
+                                        </asp:UpdatePanel>
 
                                         <div class="d-flex justify-content-between mb-5">
                                             <h5 class="text-uppercase text-black">Total price</h5>
@@ -181,12 +185,20 @@
 
                                         <h5 class="text-uppercase mb-3 text-black">Give code</h5>
 
-                                        <div class="mb-5">
-                                            <div class="form-outline">
-                                                <input type="text" id="txtCouponCode" class="form-control form-control-lg" runat="server" />
-                                                <label class="form-label" for="txtCouponCode">Enter your code</label>
-                                            </div>
-                                        </div>
+                                        <asp:UpdatePanel ID="discountUpdatePanel" runat="server" UpdateMode="Conditional">
+                                            <ContentTemplate>
+                                                <div class="mb-5">
+                                                    <div class="form-outline d-flex">
+                                                        <input type="text" id="txtCouponCode" class="form-control form-control-lg" runat="server" />
+                                                        <asp:Button ID="btnApplyCoupon" runat="server" Text="Apply" CssClass="btn btn-dark ms-2" OnClick="btnApplyCoupon_Click" />
+                                                    </div>
+                                                    <asp:Label ID="lblCouponMessage" runat="server" CssClass="d-block mt-2" Visible="false"></asp:Label>
+                                                </div>
+                                            </ContentTemplate>
+                                            <Triggers>
+                                                <asp:AsyncPostBackTrigger ControlID="btnApplyCoupon" EventName="Click" />
+                                            </Triggers>
+                                        </asp:UpdatePanel>
 
                                         <hr class="my-4">
 
@@ -203,21 +215,39 @@
     </section>
     <script type="text/javascript">
         function updateTotalPrice() {
-            var shippingSelect = document.getElementById('shippingSelect');
+            var shippingSelect = document.getElementById('<%= shippingSelect.ClientID %>');
             var totalAmount = document.getElementById('<%= lblTotalAmount.ClientID %>');
             var finalTotal = document.getElementById('<%= lblFinalTotal.ClientID %>');
+            var couponCode = document.getElementById('<%= txtCouponCode.ClientID %>').value.trim().toUpperCase();
 
             if (!shippingSelect || !totalAmount || !finalTotal) return;
 
             var shippingCost = parseFloat(shippingSelect.value);
             var basePrice = parseFloat(totalAmount.innerText.replace(/[^0-9.-]+/g, ''));
-            var newTotal = basePrice + shippingCost;
+            
+            // Valid coupon codes and their discount amounts
+            var validCoupons = {
+                'SAVE5': 5,
+                'DISCOUNT10': 10
+            };
+
+            // Get discount amount if coupon is valid
+            var discountAmount = validCoupons[couponCode] || 0;
+            
+            // Calculate new total with both shipping and discount
+            var newTotal = basePrice + shippingCost - discountAmount;
+            
+            console.log('Calculating total:');
+            console.log('Base price:', basePrice);
+            console.log('Shipping cost:', shippingCost);
+            console.log('Discount amount:', discountAmount);
+            console.log('Final total:', newTotal);
             
             finalTotal.innerText = newTotal.toFixed(0) + '€';
         }
 
         function validateShipping() {
-            var shippingSelect = document.getElementById('shippingSelect');
+            var shippingSelect = document.getElementById('<%= shippingSelect.ClientID %>');
             var shippingError = document.getElementById('shippingError');
             
             if (shippingSelect.value === "0") {
@@ -229,135 +259,32 @@
             return true;
         }
 
+        // Add event listeners
         $(document).ready(function() {
             console.log('Document ready, calling updateTotalPrice');
             updateTotalPrice();
+
+            // Add change event listener for shipping select
+            $('#<%= shippingSelect.ClientID %>').on('change', function() {
+                console.log('Shipping option changed');
+                updateTotalPrice();
+            });
         });
 
-        // Main function to handle quantity changes (both increase and decrease)
-        function handleQuantityChange(button, commandName) {
-            console.log("handleQuantityChange called. Command: ", commandName, "Button ID: ", button.id);
-
-            // Find the qtyInput within the same quantity-control parent
-            var qtyInput = button.closest('.quantity-control').querySelector('[id$=_txtQuantity]');
-            if (!qtyInput) {
-                console.error("Error: Quantity input element not found for button:", button);
-                return false;
+        // Add event listener for coupon code input
+        document.getElementById('<%= txtCouponCode.ClientID %>').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('<%= btnApplyCoupon.ClientID %>').click();
             }
+        });
 
-            // Product ID is passed via CommandArgument on the server-side, not directly needed on client-side button
-            var productId = qtyInput.dataset.productid; // Get ProductID from textbox data-attribute
-            if (!productId) {
-                console.error("Error: Product ID not found on quantity input for button.", button, qtyInput);
-                return false;
-            }
-
-            var qtyErrorSpan = getQtyErrorSpan(productId);
-            var qty = parseInt(qtyInput.value) || 1;
-            var maxStock = parseInt(qtyInput.dataset.unitsinstock) || 0;
-
-            var newQuantity = qty;
-
-            if (commandName === "Increase") {
-                newQuantity++;
-                if (newQuantity > maxStock) {
-                    newQuantity = maxStock;
-                    if (qtyErrorSpan) qtyErrorSpan.innerText = 'Số lượng vượt quá tồn kho!';
-                } else {
-                    if (qtyErrorSpan) qtyErrorSpan.innerText = '';
-                }
-            } else if (commandName === "Decrease") {
-                newQuantity--;
-                if (newQuantity < 1) {
-                    newQuantity = 1;
-                    if (qtyErrorSpan) qtyErrorSpan.innerText = ''; // Clear error if decreasing to 1
-                } else {
-                    if (qtyErrorSpan) qtyErrorSpan.innerText = '';
-                }
-            }
-            
-            // Update the textbox value immediately for visual feedback
-            qtyInput.value = newQuantity;
-
-            // Trigger server-side update
-            // The button.name is the uniqueID for the ASP.NET control, needed for __doPostBack
-            console.log("Calling __doPostBack with eventTarget: ", button.name, " and eventArgument: ", commandName);
-            __doPostBack(button.name, commandName);
-            return false;
-        }
-
-        // Handler for direct typing into quantity input
-        function handleQuantityInput() {
-            var qtyInput = this; // 'this' refers to the input element
-            var productId = qtyInput.dataset.productid;
-            var qtyErrorSpan = getQtyErrorSpan(productId);
-            var qty = parseInt(qtyInput.value) || 1;
-            var maxStock = parseInt(qtyInput.dataset.unitsinstock) || 0;
-
-            if (qty > maxStock) {
-                qtyInput.value = maxStock;
-                if (qtyErrorSpan) qtyErrorSpan.innerText = 'Số lượng vượt quá tồn kho!';
-            } else if (qty < 1) {
-                qtyInput.value = 1;
-                if (qtyErrorSpan) qtyErrorSpan.innerText = '';
-            } else {
-                if (qtyErrorSpan) qtyErrorSpan.innerText = '';
-            }
-        }
-
-        // Function to attach event listeners using delegation
-        function attachCartEventListeners() {
-            var rptShoppingCart = document.getElementById('<%= rptShoppingCart.ClientID %>');
-            if (rptShoppingCart) {
-                console.log("Attaching event listeners to rptShoppingCart.");
-                rptShoppingCart.addEventListener('click', function (e) {
-                    var target = e.target; // The element that was clicked
-                    var button = null;
-
-                    // Traverse up the DOM to find the LinkButton or its icon
-                    while (target && target !== rptShoppingCart) {
-                        if (target.tagName === 'A' && (target.id.indexOf('btnDecreaseQty') > -1 || target.id.indexOf('btnIncreaseQty') > -1)) {
-                            button = target;
-                            break;
-                        } else if (target.tagName === 'I' && target.closest('a')) {
-                            // If the icon is clicked, get its parent <a> (the LinkButton)
-                            button = target.closest('a');
-                            if (button && (button.id.indexOf('btnDecreaseQty') > -1 || button.id.indexOf('btnIncreaseQty') > -1)) {
-                                break;
-                            }
-                        }
-                        target = target.parentNode;
-                    }
-
-                    if (button) {
-                        console.log("Button clicked:", button.id);
-                        e.preventDefault(); // Prevent default link behavior
-                        var commandName = button.id.indexOf('btnDecreaseQty') > -1 ? "Decrease" : "Increase";
-                        handleQuantityChange(button, commandName);
-                    }
-                     // Also handle the remove button
-                    if (target.tagName === 'A' && target.id.indexOf('btnRemoveItem') > -1) {
-                        console.log("Remove button clicked:", target.id);
-                        e.preventDefault(); // Prevent default link behavior
-                        __doPostBack(target.name, 'Remove');
-                    }
-                });
-
-                // Attach input event listeners to all quantity textboxes within the repeater
-                document.querySelectorAll('[id$=_txtQuantity]').forEach(function (qtyInput) {
-                    qtyInput.removeEventListener('input', handleQuantityInput);
-                    qtyInput.addEventListener('input', handleQuantityInput);
-                });
-            }
-        }
-
-        // Attach listeners on initial full page load
-        document.addEventListener('DOMContentLoaded', attachCartEventListeners);
-
-        // Re-attach listeners after every ASP.NET AJAX partial postback
+        // Add event listener for UpdatePanel postback
         if (typeof Sys !== 'undefined' && Sys.WebForms && Sys.WebForms.PageRequestManager) {
-            Sys.WebForms.PageRequestManager.getInstance().add_endRequest(attachCartEventListeners);
-            console.log("Attached endRequest listener.");
+            Sys.WebForms.PageRequestManager.getInstance().add_endRequest(function(sender, args) {
+                console.log('UpdatePanel postback completed');
+                updateTotalPrice();
+            });
         }
     </script>
 </asp:Content>

@@ -11,6 +11,11 @@ namespace Shopping.View
     public partial class WebForm1 : System.Web.UI.Page
     {
         private CartController cartController;
+        private Dictionary<string, decimal> validCouponCodes = new Dictionary<string, decimal>
+        {
+            { "SAVE5", 5m },
+            { "DISCOUNT10", 10m }
+        };
 
         protected void Page_Load(object sender, EventArgs e)
         {
@@ -34,7 +39,6 @@ namespace Shopping.View
             {
                 int employeeId = Convert.ToInt32(Session["EmployeeID"]); 
                 
-                // If cartItems is not provided, get them from the controller
                 if (cartItems == null)
                 {
                     cartItems = cartController.GetCartItems(employeeId);
@@ -54,7 +58,6 @@ namespace Shopping.View
                         totalItems += item.Quantity;
                     }
 
-                    // Store base price in Session for shipping calculations
                     Session["BasePrice"] = totalPrice;
 
                     if (litItemCount != null) litItemCount.Text = totalItems.ToString();
@@ -63,7 +66,21 @@ namespace Shopping.View
                     if (lblTotalAmount != null) lblTotalAmount.Text = totalPrice.ToString("N0") + "€";
                     if (lblFinalTotal != null) lblFinalTotal.Text = totalPrice.ToString("N0") + "€";
 
-                    // Update the cart count on the master page
+                    decimal discountAmount = 0;
+                    if (Session["DiscountAmount"] != null)
+                    {
+                        discountAmount = Convert.ToDecimal(Session["DiscountAmount"]);
+                    }
+
+                    decimal shippingCost = 0;
+                    if (Session["ShippingCost"] != null)
+                    {
+                        shippingCost = Convert.ToDecimal(Session["ShippingCost"]);
+                    }
+
+                    decimal finalTotal = totalPrice + shippingCost - discountAmount;
+                    if (lblFinalTotal != null) lblFinalTotal.Text = finalTotal.ToString("N0") + "€";
+
                     SiteMaster masterPage = this.Master as SiteMaster;
                     if (masterPage != null)
                     {
@@ -78,7 +95,6 @@ namespace Shopping.View
                     lblMessage.Text = "Error loading cart items: " + ex.Message;
                     lblMessage.Visible = true;
                 }
-                System.Diagnostics.Debug.WriteLine($"Error in LoadCartItems: {ex.Message}");
             }
         }
 
@@ -147,44 +163,93 @@ namespace Shopping.View
                     lblMessage.Text = "Error processing cart item: " + ex.Message;
                     lblMessage.Visible = true;
                 }
-                System.Diagnostics.Debug.WriteLine($"Error in rptShoppingCart_ItemCommand: {ex.Message}");
             }
         }
 
-        // Add method to handle shipping cost updates
+        protected void btnApplyCoupon_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                string couponCode = txtCouponCode.Value?.Trim().ToUpper();
+                
+                if (string.IsNullOrEmpty(couponCode))
+                {
+                    lblCouponMessage.Text = "Please enter a coupon code.";
+                    lblCouponMessage.Visible = true;
+                    return;
+                }
+
+                if (validCouponCodes.TryGetValue(couponCode, out decimal discountAmount))
+                {
+                    Session["DiscountAmount"] = discountAmount;
+                    Session["CouponCode"] = couponCode;
+
+                    decimal basePrice = Convert.ToDecimal(Session["BasePrice"]);
+                    decimal shippingCost = Session["ShippingCost"] != null ? Convert.ToDecimal(Session["ShippingCost"]) : 0;
+
+                    decimal finalTotal = basePrice + shippingCost - discountAmount;
+
+                    lblFinalTotal.Text = finalTotal.ToString("N0") + "€";
+                    lblCouponMessage.Text = $"Coupon applied successfully! You saved {discountAmount}€";
+                    lblCouponMessage.CssClass = "text-success mt-2";
+                    lblCouponMessage.Visible = true;
+
+                    Session["FinalTotal"] = finalTotal;
+                }
+                else
+                {
+                    lblCouponMessage.Text = "Invalid coupon code.";
+                    lblCouponMessage.CssClass = "text-danger mt-2";
+                    lblCouponMessage.Visible = true;
+                    Session["DiscountAmount"] = 0;
+                    Session["CouponCode"] = null;
+
+                    decimal basePrice = Convert.ToDecimal(Session["BasePrice"]);
+                    decimal shippingCost = Session["ShippingCost"] != null ? Convert.ToDecimal(Session["ShippingCost"]) : 0;
+                    decimal finalTotal = basePrice + shippingCost;
+                    lblFinalTotal.Text = finalTotal.ToString("N0") + "€";
+                    Session["FinalTotal"] = finalTotal;
+                }
+
+                discountUpdatePanel.Update();
+            }
+            catch (Exception ex)
+            {
+                lblCouponMessage.Text = "An error occurred while applying the coupon.";
+                lblCouponMessage.CssClass = "text-danger mt-2";
+                lblCouponMessage.Visible = true;
+                discountUpdatePanel.Update();
+            }
+        }
+
         [System.Web.Services.WebMethod]
         public static string UpdateTotalWithShipping(decimal shippingCost)
         {
             try
             {
-                // Get the base price from the session
                 decimal basePrice = 0;
                 if (HttpContext.Current.Session["BasePrice"] != null)
                 {
                     basePrice = Convert.ToDecimal(HttpContext.Current.Session["BasePrice"]);
                 }
 
-                // Calculate new total
-                decimal newTotal = basePrice + shippingCost;
+                decimal discountAmount = 0;
+                if (HttpContext.Current.Session["DiscountAmount"] != null)
+                {
+                    discountAmount = Convert.ToDecimal(HttpContext.Current.Session["DiscountAmount"]);
+                }
 
-                // Store the new total in session
+                HttpContext.Current.Session["ShippingCost"] = shippingCost;
+
+                decimal newTotal = basePrice + shippingCost - discountAmount;
+
                 HttpContext.Current.Session["FinalTotal"] = newTotal;
 
-                // Return formatted total
                 return newTotal.ToString("N0") + "€";
             }
             catch (Exception ex)
             {
                 return "Error: " + ex.Message;
-            }
-        }
-
-        protected void Page_PreRender(object sender, EventArgs e)
-        {
-            if (Session["Cart"] != null)
-            {
-                List<CartItem> cartItems = (List<CartItem>)Session["Cart"];
-                LoadCartItems(cartItems);
             }
         }
 
@@ -198,6 +263,15 @@ namespace Shopping.View
 
             try
             {
+                var shippingSelect = Request.Form["shippingSelect"];
+                decimal shippingCost = 0;
+                if (!string.IsNullOrEmpty(shippingSelect))
+                {
+                    shippingCost = Convert.ToDecimal(shippingSelect);
+                }
+
+                Session["ShippingCost"] = shippingCost;
+
                 int employeeId = Convert.ToInt32(Session["EmployeeID"]);
                 var cartItems = cartController.GetCartItems(employeeId);
                 
@@ -224,7 +298,31 @@ namespace Shopping.View
                     }
                 }
 
-                cartController.CompleteOrder(employeeId);
+                decimal basePrice = cartItems.Sum(item => item.Quantity * item.UnitPrice);
+                Session["BasePrice"] = basePrice;
+
+                decimal discountAmount = 0;
+                string couponCode = null;
+                if (Session["DiscountAmount"] != null)
+                {
+                    discountAmount = Convert.ToDecimal(Session["DiscountAmount"]);
+                    couponCode = Session["CouponCode"]?.ToString();
+                }
+
+                decimal finalTotal = basePrice + shippingCost - discountAmount;
+                Session["FinalTotal"] = finalTotal;
+
+                lblTotalAmount.Text = basePrice.ToString("N0") + "€";
+                lblFinalTotal.Text = finalTotal.ToString("N0") + "€";
+
+                cartController.CompleteOrder(employeeId, finalTotal, couponCode, discountAmount);
+
+                Session.Remove("DiscountAmount");
+                Session.Remove("CouponCode");
+                Session.Remove("ShippingCost");
+                Session.Remove("BasePrice");
+                Session.Remove("FinalTotal");
+
                 Response.Redirect("~/View/OrderSuccess.aspx");
             }
             catch (Exception ex)
@@ -234,7 +332,6 @@ namespace Shopping.View
                     lblMessage.Text = "An error occurred while processing your order: " + ex.Message;
                     lblMessage.Visible = true;
                 }
-                System.Diagnostics.Debug.WriteLine($"Error in btnConfirm_Click: {ex.Message}");
             }
         }
     }

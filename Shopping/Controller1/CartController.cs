@@ -308,7 +308,7 @@ namespace Shopping.Controller1
             return 0;
         }
 
-        public void CompleteOrder(int employeeId)
+        public void CompleteOrder(int employeeId, decimal finalTotal, string couponCode, decimal discountAmount)
         {
             using (OracleConnection conn = Connect.Instance.GetConnection())
             {
@@ -406,10 +406,13 @@ namespace Shopping.Controller1
                         }
                     }
 
-                    // 4. Update order status (set SHIPPEDDATE to current date)
+                    // 4. Update order status with final total, coupon code, and discount amount
                     string updateOrderQuery = @"
                         UPDATE TUNG.ORDERS 
-                        SET SHIPPEDDATE = :p_shippedDate 
+                        SET SHIPPEDDATE = :p_shippedDate,
+                            TOTALAMOUNT = :p_totalAmount,
+                            COUPONCODE = :p_couponCode,
+                            DISCOUNTAMOUNT = :p_discountAmount
                         WHERE ORDERID = :p_orderId";
 
                     using (OracleCommand cmd = new OracleCommand())
@@ -418,6 +421,9 @@ namespace Shopping.Controller1
                         cmd.Connection = conn;
                         cmd.Transaction = transaction;
                         cmd.Parameters.Add(":p_shippedDate", OracleDbType.Date).Value = DateTime.Now;
+                        cmd.Parameters.Add(":p_totalAmount", OracleDbType.Decimal).Value = finalTotal;
+                        cmd.Parameters.Add(":p_couponCode", OracleDbType.Varchar2).Value = (object)couponCode ?? DBNull.Value;
+                        cmd.Parameters.Add(":p_discountAmount", OracleDbType.Decimal).Value = discountAmount;
                         cmd.Parameters.Add(":p_orderId", OracleDbType.Int32).Value = orderId;
                         cmd.ExecuteNonQuery();
                     }
